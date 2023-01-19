@@ -1,12 +1,15 @@
 '''犯人'''
 from ..cat import cat
 from ..model import Game
-from .utils import check_player, check_card, play_card
+from .utils import check_player, check_card, play_card, check_first, game_end
 
 
 @cat.on_cmd(cmds="犯人", states="game")
 async def accomplice():
     if not await check_player():
+        return
+
+    if not await check_first():
         return
 
     card = cat.cmd
@@ -19,12 +22,7 @@ async def accomplice():
 
     await play_card(card)
     game.current_player.good_person = False
-    goods, bads = game.end()
-    items = [
-        "，".join(bads) + "赢了",
-        "，".join(goods) + "输了",
-    ]
-    await cat.send("\n".join(items))
 
-    cat.state = "room"
-    await cat.send("已返回房间")
+    # ---- 部分完成 ----
+    # 这里还需要考虑警部的问题
+    await game_end(False)

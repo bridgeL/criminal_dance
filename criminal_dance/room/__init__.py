@@ -77,4 +77,4 @@ async def start_game():
         await send_private(p.id, "\n".join(items))
 
     await cat.send(f"第一发现人是 [{game.current_player.name}]")
-    await start_timer()
+    start_timer()

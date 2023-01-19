@@ -23,17 +23,18 @@ async def check_first():
     game = cat.get_data(Game)
     if not game.first:
         await cat.send("第一张牌必须是第一发现人")
+        refresh_timer()
         return False
     return True
 
 
 async def check_card(card: str):
     '''检查是否有此牌'''
-    await refresh_timer()
     game = cat.get_data(Game)
     player = game.current_player
     if card not in player.cards:
         await cat.send(f"[{player.name}] 没有 [{card}]")
+        refresh_timer()
         return False
     return True
 
@@ -44,7 +45,7 @@ async def play_card(card: str):
     player = game.current_player
     player.cards.remove(card)
     await cat.send(f"[{player.name}] 打出 [{card}]")
-    await stop_timer()
+    stop_timer()
 
 
 async def turn_next():
@@ -52,13 +53,11 @@ async def turn_next():
     game = cat.get_data(Game)
     game.turn_next()
     await cat.send(f"现在轮到 [{game.current_player.name}] 出牌")
-    asyncio.create_task(start_timer())
+    start_timer()
 
 
-async def start_timer():
-    '''超时会被系统强制弃牌（防止挂机）'''
+async def overtime():
     game = cat.get_data(Game)
-    game.fut = asyncio.get_event_loop().create_future()
     player = game.current_player
     try:
         # ---- [调试用] ----
@@ -66,33 +65,62 @@ async def start_timer():
         # ---- [调试用] ----
         await asyncio.wait_for(game.fut, config.overtime)
     except asyncio.exceptions.TimeoutError:
-        card = choice(player.cards)
+        if not game.first:
+            card = "第一发现人"
+            game.first = True
+        else:
+            card = choice(player.cards)
         player.cards.remove(card)
         await cat.send(f"[{player.name}] 被系统强制丢弃了 [{card}]")
         if card == "犯人":
             player.good_person = False
-            goods, bads = game.end()
-            items = [
-                "，".join(goods) + "赢了",
-                "，".join(bads) + "输了",
-            ]
-            await cat.send("\n".join(items))
-
-            cat.state = "room"
-            await cat.send("已返回房间")
+            await game_end(True)
         else:
             await turn_next()
     else:
         # ---- [调试用] ----
-        print(f"[{player.name}] 成功在规定时间内出牌")
+        print(f"[{player.name}] 成功在规定时间内行动")
         # ---- [调试用] ----
 
 
-async def stop_timer():
+def start_timer():
+    '''超时会被系统强制弃牌（防止挂机）'''
+    game = cat.get_data(Game)
+    game.fut = asyncio.get_event_loop().create_future()
+    asyncio.create_task(overtime())
+
+
+def stop_timer():
     game = cat.get_data(Game)
     game.fut.set_result(True)
 
 
-async def refresh_timer():
-    await stop_timer()
-    asyncio.create_task(start_timer())
+def refresh_timer():
+    stop_timer()
+    start_timer()
+
+
+async def at_one_player():
+    '''指定一位玩家'''
+    game = cat.get_data(Game)
+    player = game.get_player(cat.event.at)
+    if not player:
+        await cat.send("你需要at一个游戏中的玩家")
+        refresh_timer()
+        return
+
+
+async def game_end(good_win: bool):
+    '''游戏结束，返回房间'''
+    game = cat.get_data(Game)
+    if good_win:
+        winners, losers = game.end()
+    else:
+        losers, winners = game.end()
+    items = [
+        "，".join(winners) + "赢了",
+        "，".join(losers) + "输了",
+    ]
+    await cat.send("\n".join(items))
+    await cat.send("已返回房间")
+    cat.state = "room"
