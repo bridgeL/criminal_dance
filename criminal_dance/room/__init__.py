@@ -70,8 +70,7 @@ async def start_game():
 
     # 发牌
     for p in game.players:
-        items = ["您的手牌是"]
-        items.extend(p.cards)
+        items = ["您的手牌是", *p.cards]
         await send_private(p.id, "\n".join(items))
 
     await cat.send(f"第一发现人是 [{game.current_player.name}]")

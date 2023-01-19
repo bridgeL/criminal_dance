@@ -83,3 +83,8 @@ async def start_timer():
 async def stop_timer():
     game = cat.get_data(Game)
     game.fut.set_result(True)
+
+
+async def refresh_timer():
+    await stop_timer()
+    await start_timer()
