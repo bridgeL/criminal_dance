@@ -54,7 +54,7 @@ async def exchange():
         cat.state = "exchange"
 
 
-@cat.on_cmd(cmds=["共犯", "普通人", "不在场证明", "目击者", "侦探", "交易", "谣言", "情报交换", "警部", "犯人", "神犬"], states="exchange")
+@cat.on_cmd(cmds=["共犯", "普通人", "不在场证明", "目击者", "侦探", "交易", "谣言", "情报交换", "警部", "犯人", "神犬"], states="exchange", auto_help=False)
 async def set_exchange_card():
     game = cat.get_data(Game)
     async with game.lock:
@@ -79,6 +79,8 @@ async def set_exchange_card():
             for g in game.round_give.gives:
                 g.convey()
                 await send_private(g.recver.id, f"你得到了 [{g.giver.name}] 的 [{g.card}]")
+                items = ["你的手牌", *g.recver.cards]
+                await send_private(g.recver.id, "\n".join(items))
 
             await sleep(2)
             cat.state = "game"

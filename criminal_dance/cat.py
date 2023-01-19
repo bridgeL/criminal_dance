@@ -4,12 +4,11 @@ from ayaka import AyakaCat
 cat = AyakaCat("犯人在跳舞")
 cat.help = '''
 3-8人游玩，开局4张手牌，顺时针打牌
-
 犯人、共犯 vs 侦探、普通人
-
 游玩前请先加bot好友，否则无法发牌
-
 若长时间不出牌则会被系统强制弃牌（防止挂机）
+
+善用：局势、帮助等命令
 '''
 
 card_helps = '''
@@ -28,6 +27,6 @@ card_helps = '''
 '''.strip().split("\n")
 
 
-@cat.on_cmd(cmds="卡牌帮助", states="*")
+@cat.on_cmd(cmds="帮助", states="*")
 async def _():
     await cat.send_many(card_helps)

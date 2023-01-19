@@ -37,7 +37,9 @@ async def rumor():
 
         for g in gs:
             g.convey()
-            await send_private(g.recver.id, f"你抽到了 [{g.giver.name}] 的 [{g.card}]")
+            await send_private(g.recver.id, f"你抽到了 下家 [{g.giver.name}] 的 [{g.card}]")
+            items = ["你的手牌", *g.recver.cards]
+            await send_private(g.recver.id, "\n".join(items))
 
         await sleep(2)
         await turn_next()

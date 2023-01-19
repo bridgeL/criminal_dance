@@ -56,7 +56,7 @@ async def turn_next():
     '''game.current_player 移交行动权并通知'''
     game = cat.get_data(Game)
     game.turn_next()
-    await cat.send(f"现在轮到 [{game.current_player.name}] 出牌")
+    await cat.send(f"现在轮到 [{game.index}] [{game.current_player.name}] 出牌")
     start_timer()
 
 
