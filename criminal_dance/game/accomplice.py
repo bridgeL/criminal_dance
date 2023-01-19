@@ -1,7 +1,7 @@
 '''共犯'''
 from ..cat import cat
 from ..model import Game
-from .utils import turn_next, check_player, check_card, play_card
+from .utils import turn_next, check_player, check_card, play_card, check_first
 
 
 @cat.on_cmd(cmds="共犯", states="game")
@@ -9,6 +9,9 @@ async def accomplice():
     if not await check_player():
         return
 
+    if not await check_first():
+        return 
+    
     card = cat.cmd
     if not await check_card(card):
         return

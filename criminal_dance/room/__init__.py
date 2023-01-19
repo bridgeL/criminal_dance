@@ -56,8 +56,11 @@ async def start_game():
     n = len(room.users)
     if n < 3 or n > 8:
         return await cat.send(f"犯人在跳舞只能3-8人游玩，现在房间里有{n}人")
+    # 生成牌库
     if not room.cards:
-        room.cards = shuffle(get_cards(n))
+        room.cards = get_cards(n)
+    # 洗牌
+    shuffle(room.cards)
     await cat.send("游戏开始")
 
     # ---- [调试用] ----
