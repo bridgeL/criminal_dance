@@ -114,12 +114,12 @@ class Game(BaseModel):
     '''第一发现人是否已打出'''
     detect_num: int = 0
     '''剩余侦探数量'''
-    dog_num: int = 0
-    '''剩余神犬数量'''
-    police_num: int = 0
-    '''剩余警部数量'''
+    cert_num: int = 0
+    '''剩余不在场证明数量'''
     fut: Optional[asyncio.Future]
     '''超时控制'''
+    dog_bite: str = ""
+    '''神犬扑向的目标id'''
 
     class Config:
         arbitrary_types_allowed = True
@@ -132,15 +132,12 @@ class Game(BaseModel):
         ]
 
         self.detect_num = 0
-        self.dog_num = 0
-        self.police_num = 0
+        self.cert_num = 0
         for card in room.cards:
             if card == "侦探":
                 self.detect_num += 1
-            elif card == "神犬":
-                self.dog_num += 1
-            elif card == "警部":
-                self.police_num += 1
+            elif card == "不在场证明":
+                self.cert_num += 1
 
         for i, p in enumerate(self.players):
             if "第一发现人" in p.cards:
@@ -172,7 +169,7 @@ class Game(BaseModel):
         例如：
 
             共犯+侦探/警部/神犬 指出 犯人
-            
+
             一种可能的解决方法：当侦探/警部/神犬成功时，令其使用者变为good person
 
         返回：

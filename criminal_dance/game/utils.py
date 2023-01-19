@@ -1,7 +1,7 @@
 import asyncio
 from random import choice
 from ..cat import cat
-from ..model import Game
+from ..model import Game, Player
 from ..config import config
 
 
@@ -23,7 +23,8 @@ async def check_first():
     game = cat.get_data(Game)
     if not game.first:
         await cat.send("第一张牌必须是第一发现人")
-        refresh_timer()
+        stop_timer()
+        start_timer()
         return False
     return True
 
@@ -34,7 +35,8 @@ async def check_card(card: str):
     player = game.current_player
     if card not in player.cards:
         await cat.send(f"[{player.name}] 没有 [{card}]")
-        refresh_timer()
+        stop_timer()
+        start_timer()
         return False
     return True
 
@@ -56,9 +58,8 @@ async def turn_next():
     start_timer()
 
 
-async def overtime():
+async def overtime(player: Player):
     game = cat.get_data(Game)
-    player = game.current_player
     try:
         # ---- [调试用] ----
         print(f"[{player.name}] 超时计时器启动")
@@ -83,21 +84,18 @@ async def overtime():
         # ---- [调试用] ----
 
 
-def start_timer():
+def start_timer(player: Player | None = None):
     '''超时会被系统强制弃牌（防止挂机）'''
     game = cat.get_data(Game)
     game.fut = asyncio.get_event_loop().create_future()
-    asyncio.create_task(overtime())
+    if not player:
+        player = game.current_player
+    asyncio.create_task(overtime(player))
 
 
 def stop_timer():
     game = cat.get_data(Game)
     game.fut.set_result(True)
-
-
-def refresh_timer():
-    stop_timer()
-    start_timer()
 
 
 async def at_one_player():
@@ -106,7 +104,8 @@ async def at_one_player():
     player = game.get_player(cat.event.at)
     if not player:
         await cat.send("你需要at一个游戏中的玩家")
-        refresh_timer()
+        stop_timer()
+        start_timer()
         return
 
 

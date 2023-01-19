@@ -18,7 +18,7 @@ async def accomplice():
 
     game = cat.get_data(Game)
     if len(game.current_player.cards) > 1:
-        return await cat.send("犯人卡只能作为最后一张手牌打出~顺便一提，你暴露辣")
+        return await cat.send("犯人牌只能作为最后一张手牌打出~顺便一提，你暴露辣")
 
     await play_card(card)
     game.current_player.good_person = False
