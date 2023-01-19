@@ -46,7 +46,7 @@ class Player(BaseModel):
     '''天生都是好人，打出共犯或犯人后变坏'''
 
 
-class Dog(BaseModel):
+class MarkItem(BaseModel):
     target_id: str = ""
     '''目标id'''
     owner_id: str = ""
@@ -67,8 +67,10 @@ class Game(BaseModel):
     '''剩余不在场证明数量'''
     fut: Optional[asyncio.Future]
     '''超时控制'''
-    dog: Dog = Dog()
+    dog: MarkItem = MarkItem()
     '''神犬'''
+    police: MarkItem = MarkItem()
+    '''警部'''
     lock: asyncio.Lock = asyncio.Lock()
     '''同步锁，保证用户操作的原子性，防止一个用户因某种情况连出两牌的情况'''
 

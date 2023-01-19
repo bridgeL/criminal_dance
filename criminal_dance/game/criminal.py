@@ -8,7 +8,7 @@ from .utils import check_player, check_card, play_card, check_first, game_end
 async def accomplice():
     game = cat.get_data(Game)
     async with game.lock:
-    
+
         if not await check_player():
             return
 
@@ -23,9 +23,13 @@ async def accomplice():
             return await cat.send("犯人牌只能作为最后一张手牌打出~顺便一提，你暴露辣")
 
         game.current_player.good_person = False
-        
+
         await play_card(card)
 
-        # ---- 部分完成 ----
-        # 这里还需要考虑警部的问题
+        if game.police.target_id == cat.user.id:
+            player = game.get_player(game.police.owner_id)
+            player.good_person = True
+            await game_end(True)
+            return
+
         await game_end(False)

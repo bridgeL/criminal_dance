@@ -4,7 +4,7 @@ from ..model import Game
 from .utils import turn_next, check_player, check_card, play_card, check_first
 
 
-@cat.on_cmd(cmds=["情报交换", "交易", "警部"], states="game")
+@cat.on_cmd(cmds=["情报交换", "交易"], states="game")
 async def temp():
     game = cat.get_data(Game)
     async with game.lock:
