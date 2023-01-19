@@ -1,8 +1,8 @@
 '''房间'''
 from ..cat import cat
-from ..model import Room, get_cards, Game
+from ..model import Room, Game
 from ..game.utils import start_timer
-from .utils import shuffle, send_private
+from .utils import shuffle, send_private, get_cards
 
 
 @cat.on_cmd(cmds="犯人在跳舞")

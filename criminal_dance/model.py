@@ -1,64 +1,6 @@
 import asyncio
-from random import choice, sample
 from typing import Optional
 from pydantic import BaseModel
-
-unique_3 = ["第一发现人", "犯人", "侦探", "不在场证明"]
-unique_4 = ["第一发现人", "犯人", "侦探", "不在场证明", "共犯"]
-unique_5 = ["第一发现人", "犯人", "侦探", "不在场证明", "不在场证明", "共犯"]
-unique_6 = ["第一发现人", "犯人", "侦探", "侦探", "不在场证明", "不在场证明", "共犯", "共犯"]
-unique_7 = ["第一发现人", "犯人", "侦探", "侦探", "不在场证明", "不在场证明", "不在场证明", "共犯", "共犯"]
-unique_8 = [
-    "第一发现人", "犯人", "侦探", "侦探", "侦探", "不在场证明", "不在场证明", "不在场证明", "不在场证明", "不在场证明", "共犯", "共犯"
-]
-
-unique = [
-    0, 0, 0,
-    unique_3,
-    unique_4,
-    unique_5,
-    unique_6,
-    unique_7,
-    unique_8,
-]
-
-
-def get_unique(n: int) -> list[str]:
-    return unique[n]
-
-
-normal = [
-    "普通人", "普通人", "谣言", "谣言", "谣言", "谣言", "情报交换", "情报交换", "情报交换", "情报交换", "目击者", "目击者", "目击者", "目击者", "交易", "交易", "交易", "交易"
-]
-
-normal_n = [
-    0, 0, 0,
-    8,
-    11,
-    14,
-    15,
-    17,
-    18,
-]
-
-
-def get_normal(n: int):
-    return sample(normal, normal_n[n])
-
-
-pro = ["神犬", "警部"]
-
-
-def get_pro(n: int):
-    if n < 6:
-        return []
-    if n == 6:
-        return [choice(pro)]
-    return pro
-
-
-def get_cards(n: int):
-    return get_normal(n) + get_unique(n) + get_pro(n)
 
 
 class User(BaseModel):
@@ -104,6 +46,13 @@ class Player(BaseModel):
     '''天生都是好人，打出共犯或犯人后变坏'''
 
 
+class Dog(BaseModel):
+    target_id: str = ""
+    '''目标id'''
+    owner_id: str = ""
+    '''主人id'''
+
+
 class Game(BaseModel):
     '''游戏'''
     players: list[Player] = []
@@ -118,8 +67,10 @@ class Game(BaseModel):
     '''剩余不在场证明数量'''
     fut: Optional[asyncio.Future]
     '''超时控制'''
-    dog_bite: str = ""
-    '''神犬扑向的目标id'''
+    dog: Dog = Dog()
+    '''神犬'''
+    lock: asyncio.Lock = asyncio.Lock()
+    '''同步锁，保证用户操作的原子性，防止一个用户因某种情况连出两牌的情况'''
 
     class Config:
         arbitrary_types_allowed = True
@@ -168,7 +119,7 @@ class Game(BaseModel):
 
         例如：
 
-            共犯+侦探/警部/神犬 指出 犯人
+            共犯+警部 指出 犯人
 
             一种可能的解决方法：当侦探/警部/神犬成功时，令其使用者变为good person
 
