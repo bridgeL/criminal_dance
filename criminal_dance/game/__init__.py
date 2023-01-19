@@ -5,4 +5,6 @@ from . import simple
 from . import accomplice
 from . import criminal
 from . import watch
+from . import detect
+from . import dog
 from . import temp
