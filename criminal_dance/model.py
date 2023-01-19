@@ -1,4 +1,6 @@
+import asyncio
 from random import choice, sample
+from typing import Optional
 from pydantic import BaseModel
 
 unique_3 = ["第一发现人", "犯人", "侦探", "不在场证明"]
@@ -97,6 +99,9 @@ class Player(BaseModel):
     id: str
     name: str
     cards: list[str] = []
+    '''当前手牌'''
+    good_person: bool = True
+    '''天生都是好人，打出共犯或犯人后变坏'''
 
 
 class Game(BaseModel):
@@ -113,6 +118,11 @@ class Game(BaseModel):
     '''剩余神犬数量'''
     police_num: int = 0
     '''剩余警部数量'''
+    fut: Optional[asyncio.Future]
+    '''超时控制'''
+
+    class Config:
+        arbitrary_types_allowed = True
 
     def init(self, room: Room):
         '''将房间成员转换为游戏玩家'''
@@ -155,3 +165,26 @@ class Game(BaseModel):
         for p in self.players:
             if p.id == uid:
                 return p
+
+    def end(self):
+        '''游戏终结，给出输赢，注意，需要根据最后一张牌的情况对个别人做区分
+
+        例如：
+
+            共犯+侦探/警部/神犬 指出 犯人
+            
+            一种可能的解决方法：当侦探/警部/神犬成功时，令其使用者变为good person
+
+        返回：
+
+            goods, bads
+
+        '''
+        goods = []
+        bads = []
+        for p in self.players:
+            if p.good_person:
+                goods.append(p.name)
+            else:
+                bads.append(p.name)
+        return goods, bads

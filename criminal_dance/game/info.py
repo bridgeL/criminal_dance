@@ -5,7 +5,6 @@ from ..model import Game
 
 @cat.on_cmd(cmds="局势", states="game")
 async def show_game_info():
-    '''查看游戏局势（剩余手牌数等）'''
     game = cat.get_data(Game)
     items = ["所有玩家剩余手牌数"]
     for p in game.players:

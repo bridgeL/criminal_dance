@@ -1,6 +1,7 @@
 '''房间'''
 from ..cat import cat
 from ..model import Room, get_cards, Game
+from ..game.utils import start_timer
 from .utils import shuffle, send_private
 
 
@@ -74,3 +75,4 @@ async def start_game():
         await send_private(p.id, "\n".join(items))
 
     await cat.send(f"第一发现人是 [{game.current_player.name}]")
+    await start_timer()
