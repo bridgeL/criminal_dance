@@ -1,4 +1,5 @@
 '''房间'''
+from ayaka import AyakaChannel
 from ..cat import cat
 from ..model import Room, Game
 from ..game.utils import start_timer
@@ -24,6 +25,10 @@ async def join_room():
     except:
         await cat.send(f"[{name}] 不是bot好友，无法加入游戏")
     else:
+        cat.add_listener(AyakaChannel(
+            type="private",
+            id=cat.user.id
+        ))
         room.join(cat.user.id, name)
         room.cards = []
         await cat.send(f"[{name}] 加入房间")
@@ -36,6 +41,10 @@ async def leave_room():
     room.leave(cat.user.id)
     room.cards = []
     await cat.send(f"[{cat.user.name}] 离开房间")
+    cat.remove_listener(AyakaChannel(
+        type="private",
+        id=cat.user.id
+    ))
 
     if not room.users:
         await cat.send("房间为空，游戏结束")
@@ -62,10 +71,6 @@ async def start_game():
     # 洗牌
     shuffle(room.cards)
     await cat.send("游戏开始")
-
-    # ---- [调试用] ----
-    print("\n".join(room.cards))
-    # ---- [调试用] ----
 
     cat.state = "game"
     game = cat.get_data(Game)

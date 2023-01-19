@@ -53,6 +53,39 @@ class MarkItem(BaseModel):
     '''主人id'''
 
 
+class Give(BaseModel):
+    giver: Optional[Player]
+    recver: Optional[Player]
+    card: Optional[str]
+
+    def convey(self):
+        self.giver.cards.remove(self.card)
+        self.recver.cards.append(self.card)
+
+
+class RoundGive(BaseModel):
+    gives: list[Give] = []
+
+    def get_give(self, id: str):
+        for g in self.gives:
+            if g.giver.id == id:
+                return g
+
+    @property
+    def finish(self):
+        return all(g.card for g in self.gives)
+
+    def init(self, ps: list[Player]):
+        self.gives = [Give(giver=p) for p in ps]
+
+    def set_recver(self):
+        # 设置接收方为上家
+        ps = [g.giver for g in self.gives]
+        ps = [ps[-1], *ps[:-1]]
+        for p, g in zip(ps, self.gives):
+            g.recver = p
+
+
 class Game(BaseModel):
     '''游戏'''
     players: list[Player] = []
@@ -71,6 +104,8 @@ class Game(BaseModel):
     '''神犬'''
     police: MarkItem = MarkItem()
     '''警部'''
+    round_give: RoundGive = RoundGive()
+    '''环绕送牌'''
     lock: asyncio.Lock = asyncio.Lock()
     '''同步锁，保证用户操作的原子性，防止一个用户因某种情况连出两牌的情况'''
 

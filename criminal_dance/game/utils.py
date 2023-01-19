@@ -63,9 +63,6 @@ async def turn_next():
 async def overtime(player: Player):
     game = cat.get_data(Game)
     try:
-        # ---- [调试用] ----
-        print(f"[{player.name}] 超时计时器启动")
-        # ---- [调试用] ----
         await asyncio.wait_for(game.fut, config.overtime)
     except asyncio.exceptions.TimeoutError:
         if not game.first:
@@ -80,10 +77,6 @@ async def overtime(player: Player):
             await game_end(True)
         else:
             await turn_next()
-    else:
-        # ---- [调试用] ----
-        print(f"[{player.name}] 成功在规定时间内行动")
-        # ---- [调试用] ----
 
 
 def start_timer(player: Player | None = None):

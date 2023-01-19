@@ -58,4 +58,7 @@ async def dog_bite():
             return await game_end(True)
 
         player.cards.append("神犬")
+        await cat.send(f"[{player.name}] 获得神犬牌")
+        
+        cat.state = "game"
         await turn_next()

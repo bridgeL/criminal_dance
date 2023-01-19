@@ -57,14 +57,6 @@ def get_pro(n: int):
 
 
 def get_cards(n: int):
-    # ---- 临时调试 ----
-    return [
-        "第一发现人", "普通人", "普通人", "犯人",
-        "普通人", "普通人", "普通人", "普通人",
-        "共犯", "普通人", "普通人", "警部"
-    ]
-    # ---- 临时调试 ----
-
     return get_normal(n) + get_unique(n) + get_pro(n)
 
 
@@ -77,10 +69,6 @@ def _shuffle(cards: list[str]):
 
 
 def shuffle(cards: list[str]):
-    # ---- 临时调试 ----
-    return cards
-    # ---- 临时调试 ----
-
     for i in range(3):
         _shuffle(cards)
     return cards

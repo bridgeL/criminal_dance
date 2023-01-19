@@ -9,5 +9,6 @@ from . import watch
 from . import detect
 from . import dog
 from . import rumor
+from . import exchange
+from . import round_give
 from . import police
-from . import temp

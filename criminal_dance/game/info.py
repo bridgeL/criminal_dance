@@ -6,14 +6,6 @@ from ..model import Game
 @cat.on_cmd(cmds="局势", states="game")
 async def show_game_info():
     game = cat.get_data(Game)
-
-    # ---- 临时调试 ----
-    for p in game.players:
-        items = [f"[{p.name}]", *p.cards]
-        await cat.send("\n".join(items))
-    return
-    # ---- 临时调试 ----
-
     items = ["所有玩家剩余手牌数"]
     for p in game.players:
         items.append(f"[{p.name}] {len(p.cards)}张")
