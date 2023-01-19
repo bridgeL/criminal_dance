@@ -115,19 +115,7 @@ class Game(BaseModel):
                 return p
 
     def end(self):
-        '''游戏终结，给出输赢，注意，需要根据最后一张牌的情况对个别人做区分
-
-        例如：
-
-            共犯+警部 指出 犯人
-
-            一种可能的解决方法：当侦探/警部/神犬成功时，令其使用者变为good person
-
-        返回：
-
-            goods, bads
-
-        '''
+        '''游戏终结，给出输赢'''
         goods = []
         bads = []
         for p in self.players:

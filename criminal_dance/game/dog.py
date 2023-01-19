@@ -37,7 +37,7 @@ async def dog():
 
 
 @cat.on_cmd(cmds=["共犯", "普通人", "不在场证明", "目击者", "侦探", "交易", "谣言", "情报交换", "警部", "犯人"], states="dog")
-async def dog_bite_1():
+async def dog_bite():
     game = cat.get_data(Game)
     async with game.lock:
 

@@ -8,4 +8,5 @@ from . import criminal
 from . import watch
 from . import detect
 from . import dog
+from . import rumor
 from . import temp
