@@ -22,7 +22,7 @@ async def show_game_info():
     if game.cert_num:
         items.append(f"剩余不在场证明牌 {game.cert_num}张")
 
-    items.append(f"目前轮到 [{game.current_player.name}]")
+    items.append(f"目前轮到 {game.current_player.index_name}")
 
     await cat.send("\n".join(items))
 

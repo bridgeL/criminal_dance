@@ -99,7 +99,7 @@ class Player(BaseModel):
     async def play_card(self, card: str):
         '''打出一张牌并通知'''
         self.cards.remove(card)
-        await cat.send(f"{self.index_name}] 打出{card}")
+        await self.game.send(f"{self.index_name}] 打出{card}")
 
         # 结束超时任务
         if self.fut and not self.fut.done():

@@ -109,7 +109,7 @@ async def start_game():
         await player.send("\n".join(items))
 
     # 第一发现人
-    await game.send(f"{R.第一发现人}是 [{game.current_player.name}]")
+    await game.send(f"{R.第一发现人}是 {game.current_player.index_name}")
 
     # 设置超时任务
     set_overtime_task(game.current_player)

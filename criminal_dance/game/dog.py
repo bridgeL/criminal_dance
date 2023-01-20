@@ -1,64 +1,72 @@
 '''神犬'''
 from ..cat import cat
 from ..model import Game
-from .utils import check_player, check_card, play_card, check_at_one_player, check_first, start_timer, turn_next, game_end
+from ..config import R
 
 
-@cat.on_cmd(cmds="神犬", states="game")
+@cat.on_cmd(cmds=R.神犬, states="game", auto_help=False)
 async def dog():
+    # 排除私聊发送的消息
+    if cat.event.origin_channel:
+        return
+
     game = cat.get_data(Game)
+
+    # 排除未参加游戏的人
+    player = game.get_player(cat.user.id)
+    if not player:
+        return
+
     async with game.lock:
-
-        if not await check_player():
-            return
-
-        if not await check_first():
-            return
-
         card = cat.cmd
-        if not await check_card(card):
-            return
-
-        if not await check_at_one_player():
+        if not await player.check(card, at_require=True):
             return
 
         p2 = game.get_player(cat.event.at)
+        if not p2.cards:
+            return await game.send("神犬牌只能扑向有手牌的玩家")
+
         game.dog.target_id = p2.id
         game.dog.owner_id = cat.user.id
 
-        if not p2.cards:
-            return await cat.send("神犬牌只能扑向有手牌的玩家")
+        await player.play_card(card)
+        await game.send(f"目标是 {p2.index_name}！请TA丢弃一张牌")
 
-        await play_card(card)
-
-        await cat.send(f"请 [{p2.name}] 丢弃一张牌")
-        start_timer(p2)
         cat.state = "dog"
 
 
-@cat.on_cmd(cmds=["共犯", "普通人", "不在场证明", "目击者", "侦探", "交易", "谣言", "情报交换", "警部", "犯人"], states="dog", auto_help=False)
+@cat.on_cmd(cmds=[R.共犯, R.普通人, R.不在场证明, R.目击者, R.侦探, R.交易, R.谣言, R.情报交换, R.警部, R.犯人], states="dog", auto_help=False)
 async def dog_bite():
+    # 排除私聊发送的消息
+    if cat.event.origin_channel:
+        return
+
     game = cat.get_data(Game)
+
+    # 排除未参加游戏的人
+    player = game.get_player(cat.user.id)
+    if not player:
+        return
+
     async with game.lock:
-
-        if game.dog.target_id != cat.user.id:
-            return
-
         card = cat.cmd
-        player = game.get_player(cat.user.id)
-        if not await check_card(card, player):
+
+        if game.dog.target_id != player.id:
             return
 
-        await play_card(card, player)
+        if card not in player.cards:
+            return await game.send(f"{player.index_name} 没有{card}")
+
+        await player.play_card(card)
 
         if card == "犯人":
             player.is_good = False
             owner = game.get_player(game.dog.owner_id)
             owner.is_good = True
-            return await game_end(True)
+            return await game.end(True)
 
         player.cards.append("神犬")
-        await cat.send(f"[{player.name}] 获得神犬牌")
-        
+        await game.send(f"{player.index_name} 获得神犬牌")
+
         cat.state = "game"
-        await turn_next()
+        await game.turn_next()
