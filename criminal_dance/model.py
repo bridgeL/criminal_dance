@@ -179,10 +179,9 @@ class Game(BaseModel):
     def current_player(self):
         return self.players[self.index]
 
-    def set_cat_state(self, state: str):
+    def set_state(self, state: str):
         '''在群聊、私聊均可用'''
-        channel = AyakaChannel(type="group", id=self.group_id)
-        cat._state_dict[channel.mark] = state
+        cat.set_state(state, AyakaChannel(type="group", id=self.group_id))
 
     async def turn_next(self):
         '''转移至下一个有牌的玩家'''
@@ -223,7 +222,7 @@ class Game(BaseModel):
 
         # ---- 待修改 这里有问题，因为game.end可能会在私聊中调用
         await self.send("已返回房间")
-        cat.state = "room"
+        self.set_state("room")
 
 
 Player.update_forward_refs()

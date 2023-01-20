@@ -36,7 +36,7 @@ async def dog():
         await player.play_card(card)
         await game.send(f"目标是 {p2.index_name}！请TA丢弃一张牌")
 
-        cat.state = "dog"
+        game.set_state("dog")
 
         # 设置超时任务
         set_overtime_task(p2)
@@ -75,5 +75,5 @@ async def dog_bite():
         player.cards.append("神犬")
         await game.send(f"{player.index_name} 获得神犬牌")
 
-        cat.state = "game"
+        game.set_state("game")
         await game.turn_next()

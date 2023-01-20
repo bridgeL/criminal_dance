@@ -2,7 +2,6 @@ import asyncio
 from random import choice
 from ...model import Player
 from ...config import config
-from ...cat import cat
 
 
 def set_overtime_task(player: Player):
@@ -32,7 +31,7 @@ async def overtime(player: Player):
         player.cards.append("神犬")
         await game.send(f"{player.index_name} 获得神犬牌")
 
-        cat.state = "game"
+        game.set_state("game")
         await game.turn_next()
     else:
         print("关闭计时器")
