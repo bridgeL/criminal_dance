@@ -1,7 +1,7 @@
 '''游戏局势'''
 from ..cat import cat
 from ..model import Game
-from ..room.utils import send_private
+from ..room.cards import send_private
 
 
 @cat.on_cmd(cmds="局势", states="game")

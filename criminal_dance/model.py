@@ -1,6 +1,9 @@
 import asyncio
-from typing import Optional
+from typing import Awaitable, Callable, Optional
 from pydantic import BaseModel
+from ayaka import AyakaChannel
+from .cat import cat
+from .config import R
 
 
 class User(BaseModel):
@@ -16,7 +19,7 @@ class Room(BaseModel):
 
     @property
     def info(self):
-        items = ["当前房间人员"]
+        items = ["当前房间人员\n"]
         items.extend(u.name for u in self.users)
         return "\n".join(items)
 
@@ -38,101 +41,137 @@ class Room(BaseModel):
 
 class Player(BaseModel):
     '''玩家'''
+    index: int
+
     id: str
     name: str
+
     cards: list[str] = []
     '''当前手牌'''
-    good_person: bool = True
+
+    is_good: bool = True
     '''天生都是好人，打出共犯或犯人后变坏'''
+
+    game: "Game"
+
+    fut: Optional[asyncio.Future]
+    '''超时控制'''
+
+    choose_card: Optional[Callable[[str], Awaitable]]
+    '''需要执行的任务（放一张卡牌）'''
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    @property
+    def index_name(self):
+        '''座号+名字'''
+        return f"[座号{self.index}] {self.name}"
+
+    async def send(self, msg: str):
+        '''发送私聊消息'''
+        await cat.base_send(AyakaChannel(type="private", id=self.id), msg)
+
+    async def send_many(self, msgs: list[str]):
+        '''发送私聊消息'''
+        await cat.base_send_many(AyakaChannel(type="private", id=self.id), msgs)
+
+    async def check(self, card: str, max_num: int = 4, at_require: bool = False):
+        '''大部分情况下使用此方法来检查，神犬、交易、情报交换则需要特殊规则'''
+        if not self.game.first:
+            await self.game.send("第一张牌必须是第一发现人")
+            return False
+        if self.game.current_player != self:
+            await self.game.send("没轮到你")
+            return False
+        if card not in self.cards:
+            await self.game.send(f"{self.index_name} 没有{card}")
+            return False
+        if len(self.cards) > max_num:
+            await self.game.send(f"{card}只能在手牌<={max_num}时打出")
+            return False
+        if at_require and not self.game.get_player(cat.event.at):
+            await self.game.send("你需要at一个游戏中的玩家")
+            return False
+        return True
 
 
 class MarkItem(BaseModel):
+    '''标志物'''
     target_id: str = ""
     '''目标id'''
     owner_id: str = ""
     '''主人id'''
 
 
-class Give(BaseModel):
-    giver: Optional[Player]
-    recver: Optional[Player]
-    card: Optional[str]
-
-    def convey(self):
-        self.giver.cards.remove(self.card)
-        self.recver.cards.append(self.card)
-
-
-class RoundGive(BaseModel):
-    gives: list[Give] = []
-
-    def get_give(self, id: str):
-        for g in self.gives:
-            if g.giver.id == id:
-                return g
-
-    @property
-    def finish(self):
-        return all(g.card for g in self.gives)
-
-    def init(self, ps: list[Player]):
-        self.gives = [Give(giver=p) for p in ps]
-
-    def set_recver(self):
-        # 设置接收方为上家
-        ps = [g.giver for g in self.gives]
-        ps = [ps[-1], *ps[:-1]]
-        for p, g in zip(ps, self.gives):
-            g.recver = p
-
-
 class Game(BaseModel):
     '''游戏'''
+
     players: list[Player] = []
     '''玩家列表'''
     index: int = 0
     '''玩家指针'''
     first: bool = False
     '''第一发现人是否已打出'''
+
     detect_num: int = 0
     '''剩余侦探数量'''
     cert_num: int = 0
     '''剩余不在场证明数量'''
-    fut: Optional[asyncio.Future]
-    '''超时控制'''
+
     dog: MarkItem = MarkItem()
-    '''神犬'''
+    '''神犬标志物'''
     police: MarkItem = MarkItem()
-    '''警部'''
-    round_give: RoundGive = RoundGive()
-    '''环绕送牌'''
+    '''警部标志物'''
+
     lock: asyncio.Lock = asyncio.Lock()
     '''同步锁，保证用户操作的原子性，防止一个用户因某种情况连出两牌的情况'''
+    group_id: str = ""
+    '''群聊号'''
 
     class Config:
         arbitrary_types_allowed = True
 
-    def init(self, room: Room):
+    def init(self, room: Room, group_id: str):
         '''将房间成员转换为游戏玩家'''
+        # 保存群号
+        self.group_id = group_id
+
+        # 将room成员转换为玩家
         self.players = [
-            Player(id=u.id, name=u.name, cards=room.cards[i*4:(i+1)*4])
+            Player(
+                id=u.id, name=u.name,
+                index=i, game=self,
+                cards=room.cards[i*4:(i+1)*4],
+            )
             for i, u in enumerate(room.users)
         ]
 
+        # 统计牌数
         self.detect_num = 0
         self.cert_num = 0
         for card in room.cards:
-            if card == "侦探":
+            if card == R.侦探:
                 self.detect_num += 1
-            elif card == "不在场证明":
+            elif card == R.不在场证明:
                 self.cert_num += 1
 
+        # 设置玩家指针
         for i, p in enumerate(self.players):
-            if "第一发现人" in p.cards:
+            if R.第一发现人 in p.cards:
                 self.index = i
                 break
 
+        # 第一发现人未打出
         self.first = False
+
+    async def send(self, msg: str):
+        '''发送群聊消息'''
+        await cat.base_send(AyakaChannel(type="group", id=self.group_id), msg)
+
+    async def send_many(self, msgs: list[str]):
+        '''发送群聊消息'''
+        await cat.base_send_many(AyakaChannel(type="group", id=self.group_id), msgs)
 
     @property
     def current_player(self):
@@ -156,8 +195,11 @@ class Game(BaseModel):
         goods = []
         bads = []
         for p in self.players:
-            if p.good_person:
+            if p.is_good:
                 goods.append(p.name)
             else:
                 bads.append(p.name)
         return goods, bads
+
+
+Player.update_forward_refs()

@@ -73,7 +73,7 @@ async def overtime(player: Player):
         player.cards.remove(card)
         await cat.send(f"[{player.name}] 被系统强制丢弃了 [{card}]")
         if card == "犯人":
-            player.good_person = False
+            player.is_good = False
             await game_end(True)
         else:
             await turn_next()

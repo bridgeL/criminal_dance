@@ -2,7 +2,7 @@
 from asyncio import sleep
 from ..cat import cat
 from ..model import Game
-from ..room.utils import send_private
+from ..room.cards import send_private
 from .utils import turn_next, check_player, check_card, play_card, check_at_one_player, check_first
 
 

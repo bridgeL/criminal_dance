@@ -52,9 +52,9 @@ async def dog_bite():
         await play_card(card, player)
 
         if card == "犯人":
-            player.good_person = False
+            player.is_good = False
             owner = game.get_player(game.dog.owner_id)
-            owner.good_person = True
+            owner.is_good = True
             return await game_end(True)
 
         player.cards.append("神犬")

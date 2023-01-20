@@ -4,7 +4,7 @@ from random import choice
 from ..cat import cat
 from ..model import Game, Give
 from .utils import turn_next, check_player, check_card, play_card, check_first
-from ..room.utils import send_private
+from ..room.cards import send_private
 
 
 @cat.on_cmd(cmds="谣言", states="game")

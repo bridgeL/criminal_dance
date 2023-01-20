@@ -30,7 +30,7 @@ async def detect():
         game.detect_num -= 1
         p2 = game.get_player(cat.event.at)
         if "犯人" in p2.cards and "不在场证明" not in p2.cards:
-            game.current_player.good_person = True
+            game.current_player.is_good = True
             await game_end(True)
             return
 

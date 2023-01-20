@@ -4,7 +4,7 @@ from ..cat import cat
 from ..model import Game, Player
 from .utils import check_player, play_card, check_at_one_player, check_first, turn_next
 from .utils import check_card as _check_card
-from ..room.utils import send_private
+from ..room.cards import send_private
 
 
 async def check_card(card: str, player: Player):

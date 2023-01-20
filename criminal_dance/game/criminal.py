@@ -22,13 +22,13 @@ async def accomplice():
         if len(game.current_player.cards) > 1:
             return await cat.send("犯人牌只能作为最后一张手牌打出~顺便一提，你暴露辣")
 
-        game.current_player.good_person = False
+        game.current_player.is_good = False
 
         await play_card(card)
 
         if game.police.target_id == cat.user.id:
             player = game.get_player(game.police.owner_id)
-            player.good_person = True
+            player.is_good = True
             await game_end(True)
             return
 

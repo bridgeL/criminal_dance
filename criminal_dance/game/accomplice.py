@@ -19,7 +19,7 @@ async def accomplice():
         if not await check_card(card):
             return
         
-        game.current_player.good_person = False
+        game.current_player.is_good = False
 
         await play_card(card)
         await turn_next()
