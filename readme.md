@@ -30,6 +30,7 @@ pip install criminal_dance
 ## 作为console程序离线运行
 
 ```py
+# run.py
 import ayaka.adapters as cat
 import criminal_dance
 if __name__ == "__main__":
