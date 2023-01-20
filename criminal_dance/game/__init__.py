@@ -5,8 +5,8 @@ from . import simple
 from . import cert
 from . import accomplice
 from . import watch
+from . import detect
 # from . import criminal
-# from . import detect
 # from . import dog
 # from . import rumor
 # from . import exchange

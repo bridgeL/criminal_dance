@@ -1,38 +1,35 @@
 '''侦探'''
 from ..cat import cat
 from ..model import Game
-from .utils import turn_next, check_player, check_card, play_card, check_at_one_player, check_first, game_end
+from ..config import R
 
 
-@cat.on_cmd(cmds="侦探", states="game")
+@cat.on_cmd(cmds=R.侦探, states="game", auto_help=False)
 async def detect():
+    # 排除私聊发送的消息
+    if cat.event.origin_channel:
+        return
+
     game = cat.get_data(Game)
+
+    # 排除未参加游戏的人
+    player = game.get_player(cat.user.id)
+    if not player:
+        return
+
     async with game.lock:
-    
-        if not await check_player():
-            return
-
-        if not await check_first():
-            return
-
         card = cat.cmd
-        if not await check_card(card):
+        if not await player.check(card, max_num=2, at_require=True):
             return
-
-        if len(game.current_player.cards) > 2:
-            return await cat.send("侦探牌只能在手牌<=2时打出")
-
-        if not await check_at_one_player():
-            return
-
-        await play_card(card)
 
         game.detect_num -= 1
-        p2 = game.get_player(cat.event.at)
-        if "犯人" in p2.cards and "不在场证明" not in p2.cards:
-            game.current_player.is_good = True
-            await game_end(True)
-            return
+        await player.play_card(card)
 
-        await cat.send(f"[{p2.name}] 不是犯人~")
-        await turn_next()
+        # 侦探排查中...
+        p2 = game.get_player(cat.event.at)
+        if R.犯人 in p2.cards and R.不在场证明 not in p2.cards:
+            player.is_good = True
+            return await game.end(True)
+
+        await game.send(f"{p2.index_name} 不是犯人~")
+        await game.turn_next()
