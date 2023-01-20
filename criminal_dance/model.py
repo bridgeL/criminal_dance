@@ -73,10 +73,6 @@ class Player(BaseModel):
         '''发送私聊消息'''
         await cat.base_send(AyakaChannel(type="private", id=self.id), msg)
 
-    async def send_many(self, msgs: list[str]):
-        '''发送私聊消息'''
-        await cat.base_send_many(AyakaChannel(type="private", id=self.id), msgs)
-
     async def check(self, card: str, max_num: int = 4, at_require: bool = False):
         '''大部分情况下使用此方法来检查，神犬、交易、情报交换则需要特殊规则'''
         if card != R.第一发现人 and not self.game.first:
@@ -178,10 +174,6 @@ class Game(BaseModel):
     async def send(self, msg: str):
         '''发送群聊消息'''
         await cat.base_send(AyakaChannel(type="group", id=self.group_id), msg)
-
-    async def send_many(self, msgs: list[str]):
-        '''发送群聊消息'''
-        await cat.base_send_many(AyakaChannel(type="group", id=self.group_id), msgs)
 
     @property
     def current_player(self):

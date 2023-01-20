@@ -8,8 +8,8 @@ from . import detect
 from . import criminal
 from . import police
 from . import dog
+from . import rumor
 
-# from . import rumor
 # from . import exchange
 # from . import round_give
 
