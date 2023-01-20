@@ -1,25 +1,30 @@
 '''不在场证明'''
+'''普通人'''
+
+
+
+
 from ..cat import cat
 from ..model import Game
-from .utils import turn_next, check_player, check_card, play_card, check_first
-
-
-@cat.on_cmd(cmds="不在场证明", states="game")
+from ..config import R
+@cat.on_cmd(cmds=R.不在场证明, states="game", auto_help=False)
 async def cert():
+    # 排除私聊发送的消息
+    if cat.event.origin_channel:
+        return
+
     game = cat.get_data(Game)
+
+    # 排除未参加游戏的人
+    player = game.get_player(cat.user.id)
+    if not player:
+        return
+
     async with game.lock:
-    
-        if not await check_player():
-            return
-
-        if not await check_first():
-            return
-
         card = cat.cmd
-        if not await check_card(card):
+        if not await player.check(card):
             return
 
         game.cert_num -= 1
-
-        await play_card(card)
-        await turn_next()
+        await player.play_card(card)
+        await game.turn_next()
