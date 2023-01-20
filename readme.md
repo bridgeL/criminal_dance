@@ -21,6 +21,25 @@
 
 也可将其作为console程序离线运行
 
+## 安装
+
+```
+pip install criminal_dance
+```
+
+## 作为console程序离线运行
+
+```py
+import ayaka.adapters as cat
+import criminal_dance
+if __name__ == "__main__":
+    cat.run()
+```
+
+```
+python run.py
+```
+
 ## 猫猫帮助
 
 ```
