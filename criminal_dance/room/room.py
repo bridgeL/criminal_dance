@@ -73,7 +73,7 @@ async def show_room():
     await cat.send(room.info)
 
 
-@cat.on_cmd(cmds="开始游戏", states="room")
+@cat.on_cmd(cmds="开始", states="room")
 async def start_game():
     # 排除私聊发送的消息
     if cat.event.origin_channel:
@@ -101,7 +101,9 @@ async def start_game():
     game.init(room, cat.channel.id)
 
     # 通知
-    await game.send("游戏开始")
+    items = ["游戏开始\n"]
+    items.extend(p.index_name for p in game.players)
+    await game.send("\n".join(items))
 
     # 发牌
     for player in game.players:
