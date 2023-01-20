@@ -1,5 +1,6 @@
 '''加载子模块'''
-# from . import first
+from . import first
+from . import temp
 # from . import info
 # from . import simple
 # from . import cert

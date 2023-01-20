@@ -1,11 +1,11 @@
-'''第一发现人'''
+'''临时'''
 from ..cat import cat
 from ..model import Game
 from ..config import R
 
 
-@cat.on_cmd(cmds=R.第一发现人, states="game", auto_help=False)
-async def first():
+@cat.on_cmd(cmds=[R.犯人, R.神犬, R.警部, R.共犯, R.普通人, R.不在场证明, R.目击者, R.侦探, R.谣言, R.交易, R.情报交换], states="game", auto_help=False)
+async def temp():
     # 排除私聊发送的消息
     if cat.event.origin_channel:
         return
@@ -22,6 +22,5 @@ async def first():
         if not await player.check(card):
             return
 
-        game.first = True
         await player.play_card(card)
         await game.turn_next()

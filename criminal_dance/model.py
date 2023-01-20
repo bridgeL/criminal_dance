@@ -1,9 +1,10 @@
 import asyncio
+from random import choice
 from typing import Awaitable, Callable, Optional
 from pydantic import BaseModel
 from ayaka import AyakaChannel
 from .cat import cat
-from .config import R
+from .config import R, config
 
 
 class User(BaseModel):
@@ -66,7 +67,7 @@ class Player(BaseModel):
     @property
     def index_name(self):
         '''座号+名字'''
-        return f"[座号{self.index}] {self.name}"
+        return f"[座号{self.index+1}] {self.name}"
 
     async def send(self, msg: str):
         '''发送私聊消息'''
@@ -78,7 +79,7 @@ class Player(BaseModel):
 
     async def check(self, card: str, max_num: int = 4, at_require: bool = False):
         '''大部分情况下使用此方法来检查，神犬、交易、情报交换则需要特殊规则'''
-        if not self.game.first:
+        if card != R.第一发现人 and not self.game.first:
             await self.game.send("第一张牌必须是第一发现人")
             return False
         if self.game.current_player != self:
@@ -94,6 +95,15 @@ class Player(BaseModel):
             await self.game.send("你需要at一个游戏中的玩家")
             return False
         return True
+
+    async def play_card(self, card: str):
+        '''打出一张牌并通知'''
+        self.cards.remove(card)
+        await cat.send(f"{self.index_name}] 打出{card}")
+
+        # 结束超时任务
+        if self.fut and not self.fut.done():
+            self.fut.set_result(True)
 
 
 class MarkItem(BaseModel):
@@ -177,7 +187,7 @@ class Game(BaseModel):
     def current_player(self):
         return self.players[self.index]
 
-    def turn_next(self):
+    async def turn_next(self):
         '''转移至下一个有牌的玩家'''
         n = len(self.players)
         for i in range(n):
@@ -185,12 +195,15 @@ class Game(BaseModel):
             if self.current_player.cards:
                 break
 
+        await cat.send(f"现在轮到 {self.current_player.index_name} 出牌")
+        set_overtime_task(self.current_player)
+
     def get_player(self, uid: str):
         for p in self.players:
             if p.id == uid:
                 return p
 
-    def end(self):
+    async def end(self, good_win: bool):
         '''游戏终结，给出输赢'''
         goods = []
         bads = []
@@ -199,7 +212,46 @@ class Game(BaseModel):
                 goods.append(p.name)
             else:
                 bads.append(p.name)
-        return goods, bads
+
+        if good_win:
+            winners, losers = goods, bads
+        else:
+            winners, losers = bads, goods
+
+        items = [
+            "，".join(winners) + "赢了",
+            "，".join(losers) + "输了",
+        ]
+        await self.send("\n".join(items))
+
+        # ---- 待修改 这里有问题，因为game.end可能会在私聊中调用
+        await self.send("已返回房间")
+        cat.state = "room"
 
 
 Player.update_forward_refs()
+
+
+def set_overtime_task(player: Player):
+    '''设置超时任务'''
+    loop = asyncio.get_event_loop()
+    player.fut = loop.create_future()
+    loop.create_task(overtime(player))
+
+
+async def overtime(player: Player):
+    try:
+        print("开启计时器")
+        await asyncio.wait_for(player.fut, config.overtime)
+    except asyncio.exceptions.TimeoutError:
+        print("超时了")
+        card = choice(player.cards)
+        player.cards.remove(card)
+        await player.game.send(f"{player.index_name} 被系统强制丢弃了{card}")
+        if card == "犯人":
+            player.is_good = False
+            await player.game.end(True)
+        else:
+            await player.game.turn_next()
+    else:
+        print("关闭计时器")
