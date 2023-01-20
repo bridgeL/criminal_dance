@@ -1,9 +1,9 @@
 '''犯人'''
-from ..on import on_cmd, Game, Player
+from ..model import on_cmd, Game, Player
 from ..config import R
 
 
-@on_cmd(cmds=R.犯人, states="game", max_num=1)
+@on_cmd(cmds=R.犯人, states="game", max_num=1, auto_turn_next=False)
 async def criminal(game: Game, player: Player):
     player.is_good = False
     await game.send(f"{R.犯人}是 {player.index_name}！")

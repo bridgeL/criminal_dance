@@ -1,5 +1,5 @@
 '''警部'''
-from ..on import on_cmd, Game, Player, AtPlayer
+from ..model import on_cmd, Game, Player, AtPlayer
 from ..config import R
 
 
@@ -8,4 +8,3 @@ async def police(game: Game, player: Player, p2: AtPlayer):
     await game.send(f"目标是 {p2.index_name}！")
     game.police.target_id = p2.id
     game.police.owner_id = player.id
-    await game.turn_next()

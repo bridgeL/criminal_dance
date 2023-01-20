@@ -1,11 +1,9 @@
 '''房间'''
 from ayaka import AyakaChannel
-from .cards import get_cards
-from .shuffle import shuffle
-from .overtime import set_overtime_task
-from ..cat import cat
-from ..model import Room, Game
-from ..config import R
+from .utils import shuffle, get_cards
+from .cat import cat
+from .config import R
+from .model import Room, Game, Player, on_overtime
 
 
 @cat.on_cmd(cmds=f"{R.犯人}在跳舞")
@@ -118,4 +116,13 @@ async def start_game():
     await game.send(f"{R.第一发现人}是 {game.current_player.index_name}")
 
     # 设置超时任务
-    set_overtime_task(game.current_player)
+    overtime(game.current_player)
+
+
+@on_overtime
+async def overtime(player: Player):
+    card = R.第一发现人
+    player.cards.remove(card)
+    player.game.first = True
+    await player.game.send(f"{player.index_name} 被系统强制丢弃了{card}")
+    await player.game.turn_next()

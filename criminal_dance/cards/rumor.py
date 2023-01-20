@@ -1,7 +1,7 @@
 '''谣言'''
 from asyncio import sleep
 from random import choice
-from ..on import on_cmd, Game
+from ..model import on_cmd, Game
 from ..config import R
 
 
@@ -19,7 +19,5 @@ async def rumor(game: Game):
     game.round_give.set_receivers()
 
     await game.send(f"{R.谣言}抽取中...")
-
     await game.round_give.convey_all()
     await sleep(2)
-    await game.turn_next()

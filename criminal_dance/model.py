@@ -1,10 +1,12 @@
+'''所有模型，也是本插件耦合度最高的地方（狮 山 核 心）'''
+import inspect
 import asyncio
+from random import choice
 from typing import Awaitable, Callable, Optional
 from pydantic import BaseModel
 from ayaka import AyakaChannel
 from .cat import cat, help_dict
 from .config import R, config
-from .overtime import set_overtime_task
 
 
 class User(BaseModel):
@@ -175,11 +177,6 @@ class Game(BaseModel):
     first: bool = False
     '''第一发现人是否已打出'''
 
-    detect_num: int = 0
-    '''剩余侦探数量'''
-    cert_num: int = 0
-    '''剩余不在场证明数量'''
-
     dog: MarkItem = MarkItem()
     '''神犬标志物'''
     police: MarkItem = MarkItem()
@@ -210,15 +207,6 @@ class Game(BaseModel):
             )
             for i, u in enumerate(room.users)
         ]
-
-        # 统计牌数
-        self.detect_num = 0
-        self.cert_num = 0
-        for card in room.cards:
-            if card == R.侦探:
-                self.detect_num += 1
-            elif card == R.不在场证明:
-                self.cert_num += 1
 
         # 设置玩家指针
         for i, p in enumerate(self.players):
@@ -253,7 +241,7 @@ class Game(BaseModel):
                 break
 
         await cat.send(f"现在轮到 {self.current_player.index_name} 出牌")
-        set_overtime_task(self.current_player)
+        overtime(self.current_player)
 
     def get_player(self, uid: str):
         for p in self.players:
@@ -282,8 +270,162 @@ class Game(BaseModel):
         await self.send("\n".join(items))
         await self.send("已返回房间")
         self.set_state("room")
-        
+
         self.start = False
 
 
 Player.update_forward_refs()
+
+
+class AtPlayer(Player):
+    '''被at的玩家'''
+    pass
+
+
+def on_cmd(
+    cmds: str | list[str] = "",
+    states: str | list[str] = "",
+    max_num: int = 4,
+    at_require: bool = False,
+    auto_check_card: bool = True,
+    auto_play_card: bool = True,
+    auto_turn_next: bool = True
+):
+    '''
+    - 排除私聊发送的消息
+    - 排除非游戏玩家
+    - 检查第一发现人、行动权、是否有手牌、是否满足数量要求、是否at玩家
+    - 打出牌
+    - 执行回调（自定义）
+    - 轮到下家
+    '''
+    def decorator(func: Callable[..., Awaitable]):
+
+        # 分析func参数表
+        # 参数名:类型
+        params = inspect.signature(func).parameters
+        params = {k: v.annotation for k, v in params.items()}
+
+        async def _func():
+            # 排除私聊发送的消息
+            if cat.event.origin_channel:
+                return
+
+            game = cat.get_data(Game)
+
+            # 排除未参加游戏的人
+            player = game.get_player(cat.user.id)
+            if not player:
+                return
+
+            async with game.lock:
+                card = cat.cmd
+                if auto_check_card:
+                    if not await player.check(card, max_num, at_require):
+                        return
+
+                    if auto_play_card:
+                        await player.play_card(card)
+
+                # 依赖注入
+                _params = {}
+
+                for key, cls in params.items():
+                    if cls is Game:
+                        _params[key] = game
+                    elif cls is Player:
+                        _params[key] = player
+                    elif cls is AtPlayer:
+                        p2 = game.get_player(cat.event.at)
+                        _params[key] = p2
+                    elif cls is str:
+                        _params[key] = card
+
+                await func(**_params)
+
+                if auto_turn_next:
+                    await game.turn_next()
+
+        _func.__name__ = func.__name__
+        cat.on_cmd(cmds=cmds, states=states, auto_help=False)(_func)
+        return func
+
+    return decorator
+
+
+def set_rg_cmd(
+    cmds: str | list[str],
+    states: str | list[str],
+    name: str
+):
+    '''
+    - 只接受私聊发送的消息
+    - 排除give.giver玩家
+    - 排除打牌失败
+    - 交换牌
+    '''
+    async def _func():
+        # 只接受私聊发送的消息
+        if not cat.event.origin_channel:
+            return
+
+        game = cat.get_data(Game)
+
+        # 排除不参与情报交换的
+        give = game.round_give.get_give(cat.user.id)
+        if not give:
+            return
+
+        async with game.lock:
+            card = cat.cmd
+            if card not in give.giver.cards:
+                items = ["你没有这张牌，你当前的手牌是\n", *give.giver.cards]
+                return await give.giver.send("\n".join(items))
+
+            give.card = card
+            give.giver.fut.set_result(True)
+            await game.send(f"{give.giver.index_name} 已决定好卡牌")
+
+            # 判断是否完成
+            if game.round_give.all_given:
+                # 私聊 互相给牌
+                game.round_give.set_receivers()
+                await game.round_give.convey_all()
+                await asyncio.sleep(2)
+
+                game.set_state("game")
+                await game.turn_next()
+    _func.__name__ = name
+    cat.on_cmd(cmds=cmds, states=states, auto_help=False)(_func)
+
+
+def on_overtime(func: Callable[[Player], Awaitable]):
+    '''超时任务装饰器'''
+
+    async def overtime(player: Player):
+        try:
+            await asyncio.wait_for(player.fut, config.overtime)
+        except asyncio.exceptions.TimeoutError:
+            async with player.game.lock:
+                await func(player)
+
+    def set_start(player: Player):
+        loop = asyncio.get_event_loop()
+        player.fut = loop.create_future()
+        loop.create_task(overtime(player))
+
+    return set_start
+
+
+@on_overtime
+async def overtime(player: Player):
+    '''打牌超时'''
+    game = player.game
+    card = choice(player.cards)
+    player.cards.remove(card)
+    await game.send(f"{player.index_name} 被系统强制丢弃了{card}")
+    if card == R.犯人:
+        player.is_good = False
+        await game.end(True)
+    else:
+        await game.turn_next()

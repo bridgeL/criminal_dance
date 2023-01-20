@@ -1,6 +1,6 @@
 '''目击者'''
 from asyncio import sleep
-from ..on import on_cmd, Game, Player, AtPlayer
+from ..model import on_cmd, Game, Player, AtPlayer
 from ..config import R
 
 
@@ -11,5 +11,3 @@ async def watch(game: Game, player: Player, p2: AtPlayer):
 
     await game.send(f"{R.目击者}观察中...")
     await sleep(2)
-
-    await game.turn_next()
