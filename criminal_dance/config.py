@@ -21,6 +21,8 @@ class Rename(BaseModel):
 class Config(AyakaConfig):
     __config_name__ = "犯人在跳舞"
     overtime: int = 90
+    auto_card_help: bool = True
+    '''每打一张牌，就自动发送该牌的帮助'''
     rename: Rename = Rename()
 
 
@@ -29,6 +31,3 @@ config = Config()
 
 R = config.rename
 '''config.rename的缩写'''
-
-# 临时测试
-config.overtime = 20

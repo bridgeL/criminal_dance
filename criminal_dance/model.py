@@ -2,8 +2,8 @@ import asyncio
 from typing import Awaitable, Callable, Optional
 from pydantic import BaseModel
 from ayaka import AyakaChannel
-from .cat import cat
-from .config import R
+from .cat import cat, help_dict
+from .config import R, config
 from .overtime import set_overtime_task
 
 
@@ -74,7 +74,7 @@ class Player(BaseModel):
         await cat.base_send(AyakaChannel(type="private", id=self.id), msg)
 
     async def check(self, card: str, max_num: int = 4, at_require: bool = False):
-        '''大部分情况下使用此方法来检查，神犬、交易、情报交换则需要特殊规则'''
+        '''检查牌是否可以打出'''
         if card != R.第一发现人 and not self.game.first:
             await self.game.send("第一张牌必须是第一发现人")
             return False
@@ -96,6 +96,8 @@ class Player(BaseModel):
         '''打出一张牌并通知'''
         self.cards.remove(card)
         await self.game.send(f"{self.index_name} 打出{card}")
+        if config.auto_card_help:
+            await self.game.send(help_dict[card])
 
         # 结束超时任务
         if self.fut and not self.fut.done():
@@ -108,6 +110,58 @@ class MarkItem(BaseModel):
     '''目标id'''
     owner_id: str = ""
     '''主人id'''
+
+
+class GiveAction(BaseModel):
+    giver: Optional[Player]
+    receiver: Optional[Player]
+    card: Optional[str]
+
+    @property
+    def ready(self):
+        return self.giver and self.receiver and self.card
+
+    def convey(self):
+        if self.ready:
+            self.giver.cards.remove(self.card)
+            self.receiver.cards.append(self.card)
+
+
+class RoundGive(BaseModel):
+    gives: list[GiveAction] = []
+
+    def init(self, givers: list[Player]):
+        self.gives = [GiveAction(giver=p) for p in givers]
+
+    def get_give(self, giver_id: str):
+        for g in self.gives:
+            if g.giver.id == giver_id:
+                return g
+
+    @property
+    def all_given(self):
+        '''所有人给牌完毕'''
+        for g in self.gives:
+            if not g.card:
+                return False
+        return True
+
+    def set_receivers(self):
+        '''手牌给上家'''
+        gs = [self.gives[-1], *self.gives[:-1]]
+        rs = [g.giver for g in gs]
+        for r, g in zip(rs, self.gives):
+            g.receiver = r
+
+    async def convey_all(self):
+        for g in self.gives:
+            g.convey()
+            await g.giver.send(f"您的上家 {g.receiver.index_name} 抽走了您的{g.card}")
+
+        for g in self.gives:
+            await g.receiver.send(f"您抽到了下家 {g.giver.index_name} 的{g.card}")
+            items = ["您当前的手牌\n", *g.receiver.cards]
+            await g.receiver.send("\n".join(items))
 
 
 class Game(BaseModel):
@@ -134,6 +188,9 @@ class Game(BaseModel):
     '''同步锁，保证用户操作的原子性，防止一个用户因某种情况连出两牌的情况'''
     group_id: str = ""
     '''群聊号'''
+
+    round_give: RoundGive = RoundGive()
+    '''环绕给牌'''
 
     class Config:
         arbitrary_types_allowed = True
@@ -226,14 +283,3 @@ class Game(BaseModel):
 
 
 Player.update_forward_refs()
-
-
-class GiveAction(BaseModel):
-    giver: Optional[Player]
-    receiver: Optional[Player]
-    card: Optional[str]
-
-    def convey(self):
-        if self.giver and self.receiver and self.card:
-            self.giver.cards.remove(self.card)
-            self.receiver.cards.append(self.card)

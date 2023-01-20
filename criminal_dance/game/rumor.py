@@ -2,7 +2,7 @@
 from asyncio import sleep
 from random import choice
 from ..cat import cat
-from ..model import Game, GiveAction
+from ..model import Game
 from ..config import R
 
 
@@ -26,25 +26,19 @@ async def rumor():
 
         await player.play_card(card)
 
-        # 所有有牌的人被随机抽一张牌
+        # 所有有牌的人
         ps = [p for p in game.players if p.cards]
-        gs = [GiveAction(giver=p, card=choice(p.cards)) for p in ps]
+        game.round_give.init(ps)
+
+        # 被随机抽一张牌
+        for g in game.round_give.gives:
+            g.card = choice(g.giver.cards)
 
         # 设置接收方为上家
-        ps = [ps[-1], *ps[:-1]]
-        for p, g in zip(ps, gs):
-            g.receiver = p
+        game.round_give.set_receivers()
 
         await cat.send("谣言抽取中...")
 
-        for g in gs:
-            g.convey()
-            await g.giver.send(f"您的上家 {g.receiver.index_name} 抽走了您的{g.card}")
-
-        for g in gs:
-            await g.receiver.send(f"您抽到了下家 {g.giver.index_name} 的{g.card}")
-            items = ["您当前的手牌\n", *g.receiver.cards]
-            await g.receiver.send("\n".join(items))
-
+        await game.round_give.convey_all()
         await sleep(2)
         await game.turn_next()

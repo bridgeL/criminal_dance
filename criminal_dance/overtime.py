@@ -20,13 +20,15 @@ async def overtime(player: "Player"):
         await asyncio.wait_for(player.fut, config.overtime)
     except asyncio.exceptions.TimeoutError:
         print("超时了")
-        card = choice(player.cards)
-        player.cards.remove(card)
-        await player.game.send(f"{player.index_name} 被系统强制丢弃了{card}")
-        if card == "犯人":
-            player.is_good = False
-            await player.game.end(True)
-        else:
-            await player.game.turn_next()
+        game = player.game
+        async with game.lock:
+            card = choice(player.cards)
+            player.cards.remove(card)
+            await game.send(f"{player.index_name} 被系统强制丢弃了{card}")
+            if card == "犯人":
+                player.is_good = False
+                await game.end(True)
+            else:
+                await game.turn_next()
     else:
         print("关闭计时器")

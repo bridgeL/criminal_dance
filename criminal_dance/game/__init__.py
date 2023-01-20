@@ -9,9 +9,7 @@ from . import criminal
 from . import police
 from . import dog
 from . import rumor
-
-# from . import exchange
-# from . import round_give
+from . import exchange
+from . import round_give
 
 from . import info
-from . import temp

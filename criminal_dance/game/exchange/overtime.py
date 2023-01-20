@@ -18,21 +18,22 @@ async def overtime(player: Player):
     except asyncio.exceptions.TimeoutError:
         print("超时了")
         game = player.game
+        give = game.round_give.get_give(player.id)
         async with game.lock:
             card = choice(player.cards)
-            player.cards.remove(card)
-            await game.send(f"{player.index_name} 被系统强制丢弃了{card}")
+            give.card = card
+            await player.send(f"您被系统强制交出了{card}")
+            await game.send(f"{give.giver.index_name} 已决定好卡牌")
 
-            if card == "犯人":
-                player.is_good = False
-                owner = game.get_player(game.dog.owner_id)
-                owner.is_good = True
-                return await game.end(True)
+            # 判断是否完成
+            if game.round_give.all_given:
+                # 私聊 互相给牌
+                game.round_give.set_receivers()
+                game.round_give.convey_all()
+                await asyncio.sleep(2)
+                
+                game.set_state("game")
+                await game.turn_next()
 
-            player.cards.append("神犬")
-            await game.send(f"{player.index_name} 获得神犬牌")
-
-            game.set_state("game")
-            await game.turn_next()
     else:
         print("关闭计时器")
