@@ -130,6 +130,7 @@ async def overtime(player: Player):
         print("超时了")
         card = R.第一发现人
         player.cards.remove(card)
+        player.game.first = True
         await player.game.send(f"{player.index_name} 被系统强制丢弃了{card}")
         await player.game.turn_next()
     else:

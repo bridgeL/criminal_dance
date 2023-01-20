@@ -23,6 +23,7 @@ async def criminal():
             return
 
         await player.play_card(card)
+        player.is_good = False
         await game.send(f"{R.犯人}是 {player.index_name}！")
 
         # 被警部抓到了

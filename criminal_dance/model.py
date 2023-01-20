@@ -82,7 +82,7 @@ class Player(BaseModel):
         if card != R.第一发现人 and not self.game.first:
             await self.game.send("第一张牌必须是第一发现人")
             return False
-        if self.game.current_player != self:
+        if self.game.current_player.id != self.id:
             await self.game.send("没轮到你")
             return False
         if card not in self.cards:

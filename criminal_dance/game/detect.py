@@ -24,9 +24,11 @@ async def detect():
 
         game.detect_num -= 1
         await player.play_card(card)
+        
+        p2 = game.get_player(cat.event.at)
+        await game.send(f"目标是 {p2.index_name}！")
 
         # 侦探排查中...
-        p2 = game.get_player(cat.event.at)
         if R.犯人 in p2.cards and R.不在场证明 not in p2.cards:
             player.is_good = True
             return await game.end(True)

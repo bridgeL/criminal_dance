@@ -25,10 +25,11 @@ async def police():
         if not await player.check(card, max_num=2, at_require=True):
             return
 
+        await player.play_card(card)
+        
         game.police.target_id = cat.event.at
         game.police.owner_id = cat.user.id
         p2 = game.get_player(cat.event.at)
 
-        await player.play_card(card)
         await game.send(f"目标是 {p2.index_name}！")
         await game.turn_next()

@@ -4,7 +4,7 @@ from ..model import Game
 from ..config import R
 
 
-@cat.on_cmd(cmds=[R.犯人, R.神犬, R.警部, R.共犯, R.普通人, R.不在场证明, R.目击者, R.侦探, R.谣言, R.交易, R.情报交换], states="game", auto_help=False)
+@cat.on_cmd(cmds=[R.神犬, R.谣言, R.交易, R.情报交换], states="game", auto_help=False)
 async def temp():
     # 排除私聊发送的消息
     if cat.event.origin_channel:
