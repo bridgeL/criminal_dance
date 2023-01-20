@@ -1,10 +1,10 @@
 import asyncio
-from random import choice
 from typing import Awaitable, Callable, Optional
 from pydantic import BaseModel
 from ayaka import AyakaChannel
 from .cat import cat
-from .config import R, config
+from .config import R
+from .overtime import set_overtime_task
 
 
 class User(BaseModel):
@@ -99,7 +99,7 @@ class Player(BaseModel):
     async def play_card(self, card: str):
         '''打出一张牌并通知'''
         self.cards.remove(card)
-        await self.game.send(f"{self.index_name}] 打出{card}")
+        await self.game.send(f"{self.index_name} 打出{card}")
 
         # 结束超时任务
         if self.fut and not self.fut.done():
@@ -187,6 +187,11 @@ class Game(BaseModel):
     def current_player(self):
         return self.players[self.index]
 
+    def set_cat_state(self, state: str):
+        '''在群聊、私聊均可用'''
+        channel = AyakaChannel(type="group", id=self.group_id)
+        cat._state_dict[channel.mark] = state
+
     async def turn_next(self):
         '''转移至下一个有牌的玩家'''
         n = len(self.players)
@@ -230,28 +235,3 @@ class Game(BaseModel):
 
 
 Player.update_forward_refs()
-
-
-def set_overtime_task(player: Player):
-    '''设置超时任务'''
-    loop = asyncio.get_event_loop()
-    player.fut = loop.create_future()
-    loop.create_task(overtime(player))
-
-
-async def overtime(player: Player):
-    try:
-        print("开启计时器")
-        await asyncio.wait_for(player.fut, config.overtime)
-    except asyncio.exceptions.TimeoutError:
-        print("超时了")
-        card = choice(player.cards)
-        player.cards.remove(card)
-        await player.game.send(f"{player.index_name} 被系统强制丢弃了{card}")
-        if card == "犯人":
-            player.is_good = False
-            await player.game.end(True)
-        else:
-            await player.game.turn_next()
-    else:
-        print("关闭计时器")

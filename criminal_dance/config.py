@@ -32,4 +32,4 @@ R = config.rename
 '''config.rename的缩写'''
 
 # 临时测试
-config.overtime = 20
+config.overtime = 2

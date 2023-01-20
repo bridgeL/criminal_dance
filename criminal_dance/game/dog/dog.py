@@ -1,7 +1,8 @@
 '''神犬'''
-from ..cat import cat
-from ..model import Game
-from ..config import R
+from .overtime import set_overtime_task
+from ...cat import cat
+from ...model import Game
+from ...config import R
 
 
 @cat.on_cmd(cmds=R.神犬, states="game", auto_help=False)
@@ -22,6 +23,9 @@ async def dog():
         if not await player.check(card, at_require=True):
             return
 
+        if cat.event.at == player.id:
+            return await game.send("狗不咬主人")
+
         p2 = game.get_player(cat.event.at)
         if not p2.cards:
             return await game.send("神犬牌只能扑向有手牌的玩家")
@@ -33,6 +37,9 @@ async def dog():
         await game.send(f"目标是 {p2.index_name}！请TA丢弃一张牌")
 
         cat.state = "dog"
+
+        # 设置超时任务
+        set_overtime_task(p2)
 
 
 @cat.on_cmd(cmds=[R.共犯, R.普通人, R.不在场证明, R.目击者, R.侦探, R.交易, R.谣言, R.情报交换, R.警部, R.犯人], states="dog", auto_help=False)
