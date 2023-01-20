@@ -29,7 +29,7 @@ async def overtime(player: Player):
             if game.round_give.all_given:
                 # 私聊 互相给牌
                 game.round_give.set_receivers()
-                game.round_give.convey_all()
+                await game.round_give.convey_all()
                 await asyncio.sleep(2)
                 
                 game.set_state("game")

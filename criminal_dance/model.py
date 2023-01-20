@@ -123,6 +123,7 @@ class GiveAction(BaseModel):
 
     def convey(self):
         if self.ready:
+            print(self.giver.name, self.receiver.name, self.card, self.giver.cards, self.receiver.cards)
             self.giver.cards.remove(self.card)
             self.receiver.cards.append(self.card)
 
@@ -156,10 +157,10 @@ class RoundGive(BaseModel):
     async def convey_all(self):
         for g in self.gives:
             g.convey()
-            await g.giver.send(f"您的上家 {g.receiver.index_name} 抽走了您的{g.card}")
+            await g.giver.send(f"{g.receiver.index_name} 获得了您的{g.card}")
 
         for g in self.gives:
-            await g.receiver.send(f"您抽到了下家 {g.giver.index_name} 的{g.card}")
+            await g.receiver.send(f"您获得了 {g.giver.index_name} 的{g.card}")
             items = ["您当前的手牌\n", *g.receiver.cards]
             await g.receiver.send("\n".join(items))
 

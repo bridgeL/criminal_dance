@@ -60,6 +60,7 @@ async def set_round_give():
             return await give.giver.send("\n".join(items))
 
         give.card = card
+        give.giver.fut.set_result(True)
         await game.send(f"{give.giver.index_name} 已决定好卡牌")
 
         # 判断是否完成

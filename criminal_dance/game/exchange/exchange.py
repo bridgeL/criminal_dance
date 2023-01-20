@@ -24,6 +24,9 @@ async def exchange():
         if not await player.check(card, at_require=True):
             return
 
+        if cat.event.at == player.id:
+            return await game.send("不能和自己交易")
+            
         await player.play_card(card)
 
         p2 = game.get_player(cat.event.at)
@@ -72,6 +75,7 @@ async def set_exchange_card():
             return await give.giver.send("\n".join(items))
 
         give.card = card
+        give.giver.fut.set_result(True)
         await game.send(f"{give.giver.index_name} 已决定好卡牌")
 
         # 判断是否完成
