@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "criminal_dance"
-version = "0.0.2"
+version = "0.0.3b0"
 description = "犯人在跳舞"
 authors = ["Su <wxlxy316@163.com>"]
 license = "MIT"
