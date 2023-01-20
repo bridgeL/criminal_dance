@@ -1,12 +1,9 @@
 '''警部'''
-'''犯人'''
-
-
-
-
 from ..cat import cat
 from ..model import Game
 from ..config import R
+
+
 @cat.on_cmd(cmds=R.警部, states="game", auto_help=False)
 async def police():
     # 排除私聊发送的消息
@@ -26,7 +23,7 @@ async def police():
             return
 
         await player.play_card(card)
-        
+
         game.police.target_id = cat.event.at
         game.police.owner_id = cat.user.id
         p2 = game.get_player(cat.event.at)

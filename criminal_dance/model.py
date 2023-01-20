@@ -83,7 +83,7 @@ class Player(BaseModel):
             await self.game.send("第一张牌必须是第一发现人")
             return False
         if self.game.current_player.id != self.id:
-            await self.game.send("没轮到你")
+            await self.game.send("没轮到您")
             return False
         if card not in self.cards:
             await self.game.send(f"{self.index_name} 没有{card}")
@@ -92,7 +92,7 @@ class Player(BaseModel):
             await self.game.send(f"{card}只能在手牌<={max_num}时打出")
             return False
         if at_require and not self.game.get_player(cat.event.at):
-            await self.game.send("你需要at一个游戏中的玩家")
+            await self.game.send("您需要at一个游戏中的玩家")
             return False
         return True
 
@@ -235,3 +235,14 @@ class Game(BaseModel):
 
 
 Player.update_forward_refs()
+
+
+class GiveAction(BaseModel):
+    giver: Optional[Player]
+    receiver: Optional[Player]
+    card: Optional[str]
+
+    def convey(self):
+        if self.giver and self.receiver and self.card:
+            self.giver.cards.remove(self.card)
+            self.receiver.cards.append(self.card)

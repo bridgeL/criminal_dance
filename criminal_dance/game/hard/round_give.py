@@ -39,7 +39,7 @@ async def round_give():
 
         # 私聊通知
         for g in game.round_give.gives:
-            await send_private(g.giver.id, "请在这里发送你要交换的牌")
+            await send_private(g.giver.id, "请在这里发送您要交换的牌")
             # 这里还要写一个私聊超时发送的东西
             # ---- 先鸽了 ----
 
@@ -70,8 +70,8 @@ async def set_round_give():
             game.round_give.set_recver()
             for g in game.round_give.gives:
                 g.convey()
-                await send_private(g.recver.id, f"你得到了 下家 [{g.giver.name}] 的 [{g.card}]")
-                items = ["你的手牌", *g.recver.cards]
+                await send_private(g.recver.id, f"您得到了 下家 [{g.giver.name}] 的 [{g.card}]")
+                items = ["您的手牌", *g.recver.cards]
                 await send_private(g.recver.id, "\n".join(items))
                 
             await sleep(2)

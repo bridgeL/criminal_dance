@@ -1,12 +1,9 @@
 '''不在场证明'''
-'''普通人'''
-
-
-
-
 from ..cat import cat
 from ..model import Game
 from ..config import R
+
+
 @cat.on_cmd(cmds=R.不在场证明, states="game", auto_help=False)
 async def cert():
     # 排除私聊发送的消息
