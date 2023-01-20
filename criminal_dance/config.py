@@ -1,7 +1,6 @@
 '''配置'''
 from pydantic import BaseModel
 from ayaka import AyakaConfig
-from .cat import cat
 
 
 class Rename(BaseModel):
@@ -20,7 +19,7 @@ class Rename(BaseModel):
 
 
 class Config(AyakaConfig):
-    __config_name__ = cat.name
+    __config_name__ = "犯人在跳舞"
     overtime: int = 90
     rename: Rename = Rename()
 
