@@ -2,6 +2,8 @@
 
 # 犯人在跳舞 0.0.1b3
 
+祝各位新年快乐~
+
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/criminal_dance)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/criminal_dance)
 ![PyPI - License](https://img.shields.io/pypi/l/criminal_dance)
