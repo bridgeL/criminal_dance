@@ -2,35 +2,33 @@
 from asyncio import sleep
 from ..cat import cat
 from ..model import Game
-from ..room.cards import send_private
-from .utils import turn_next, check_player, check_card, play_card, check_at_one_player, check_first
+from ..config import R
 
 
-@cat.on_cmd(cmds="目击者", states="game")
+@cat.on_cmd(cmds=R.目击者, states="game", auto_help=False)
 async def watch():
+    # 排除私聊发送的消息
+    if cat.event.origin_channel:
+        return
+
     game = cat.get_data(Game)
+
+    # 排除未参加游戏的人
+    player = game.get_player(cat.user.id)
+    if not player:
+        return
+
     async with game.lock:
-
-        if not await check_player():
-            return
-
-        if not await check_first():
-            return
-
         card = cat.cmd
-        if not await check_card(card):
+        if not await player.check(card, at_require=True):
             return
 
-        if not await check_at_one_player():
-            return
-
-        await play_card(card)
+        await player.play_card(card)
 
         p2 = game.get_player(cat.event.at)
-        items = [f"[{p2.name}]的手牌是", *p2.cards]
-        await send_private(cat.user.id, "\n".join(items))
-        
-        await cat.send("目击者观察中...")
-        await sleep(2)
+        items = [f"{p2.index_name} 的手牌是\n", *p2.cards]
 
-        await turn_next()
+        await player.send("\n".join(items))
+        await game.send(f"{R.目击者}观察中...")
+        await sleep(2)
+        await game.turn_next()

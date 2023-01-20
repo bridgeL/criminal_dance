@@ -3,9 +3,9 @@ from . import first
 from . import temp
 from . import simple
 from . import cert
-# from . import accomplice
+from . import accomplice
+from . import watch
 # from . import criminal
-# from . import watch
 # from . import detect
 # from . import dog
 # from . import rumor
