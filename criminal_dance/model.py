@@ -166,6 +166,7 @@ class RoundGive(BaseModel):
 
 class Game(BaseModel):
     '''游戏'''
+    start: bool = False
 
     players: list[Player] = []
     '''玩家列表'''
@@ -228,6 +229,9 @@ class Game(BaseModel):
         # 第一发现人未打出
         self.first = False
 
+        # 正式开始
+        self.start = True
+
     async def send(self, msg: str):
         '''发送群聊消息'''
         await cat.base_send(AyakaChannel(type="group", id=self.group_id), msg)
@@ -278,6 +282,8 @@ class Game(BaseModel):
         await self.send("\n".join(items))
         await self.send("已返回房间")
         self.set_state("room")
+        
+        self.start = False
 
 
 Player.update_forward_refs()

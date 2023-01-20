@@ -4,7 +4,7 @@ from ..model import Game
 from ..config import R
 
 
-@cat.on_cmd(cmds="局势", states="game")
+@cat.on_cmd(cmds="局势", states="*")
 async def show_game_info():
     '''查看场面局势'''
     # 排除私聊发送的消息
@@ -12,6 +12,9 @@ async def show_game_info():
         return
 
     game = cat.get_data(Game)
+
+    if not game.start:
+        return
 
     items = ["所有玩家剩余手牌数"]
     for p in game.players:
@@ -28,7 +31,7 @@ async def show_game_info():
     await cat.send("\n".join(items))
 
 
-@cat.on_cmd(cmds="手牌", states="game")
+@cat.on_cmd(cmds="手牌", states="*")
 async def show_cards():
     '''私聊展示手牌'''
     # 只接受私聊发送的消息
@@ -36,6 +39,10 @@ async def show_cards():
         return
 
     game = cat.get_data(Game)
+
+    if not game.start:
+        return
+
     player = game.get_player(cat.event.origin_channel.id)
     items = ["您的手牌\n", *player.cards]
     await player.send("\n".join(items))
