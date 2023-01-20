@@ -20,6 +20,7 @@ async def wakeup():
 
 @cat.on_cmd(cmds="加入", states="room")
 async def join_room():
+    '''加入房间'''
     name = cat.user.name
     room = cat.get_data(Room)
     channel = AyakaChannel(
@@ -43,6 +44,7 @@ async def join_room():
 
 @cat.on_cmd(cmds="离开", states="room")
 async def leave_room():
+    '''离开房间'''
     name = cat.user.name
     room = cat.get_data(Room)
     channel = AyakaChannel(
@@ -65,6 +67,7 @@ async def leave_room():
 
 @cat.on_cmd(cmds="房间", states="room")
 async def show_room():
+    '''查看房间信息'''
     # 排除私聊发送的消息
     if cat.event.origin_channel:
         return
@@ -75,6 +78,7 @@ async def show_room():
 
 @cat.on_cmd(cmds="开始", states="room")
 async def start_game():
+    '''开始游戏'''
     # 排除私聊发送的消息
     if cat.event.origin_channel:
         return
