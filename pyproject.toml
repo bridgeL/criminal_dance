@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "criminal_dance"
+version = "0.0.1b2"
+description = "犯人在跳舞"
+authors = ["Su <wxlxy316@163.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/bridgeL/criminal_dance"
+packages = [
+    { include = "criminal_dance" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+ayaka = "^0.0.1.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
