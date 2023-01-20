@@ -1,32 +1,34 @@
 '''警部'''
+'''犯人'''
+
+
+
+
 from ..cat import cat
 from ..model import Game
-from .utils import check_player, check_card, play_card, check_first, check_at_one_player, turn_next
-
-
-@cat.on_cmd(cmds="警部", states="game")
+from ..config import R
+@cat.on_cmd(cmds=R.警部, states="game", auto_help=False)
 async def police():
+    # 排除私聊发送的消息
+    if cat.event.origin_channel:
+        return
+
     game = cat.get_data(Game)
+
+    # 排除未参加游戏的人
+    player = game.get_player(cat.user.id)
+    if not player:
+        return
+
     async with game.lock:
-
-        if not await check_player():
-            return
-
-        if not await check_first():
-            return
-
         card = cat.cmd
-        if not await check_card(card):
-            return
-
-        if len(game.current_player.cards) > 2:
-            return await cat.send("警部牌只能在手牌数<=2时打出")
-
-        if not await check_at_one_player():
+        if not await player.check(card, max_num=2, at_require=True):
             return
 
         game.police.target_id = cat.event.at
         game.police.owner_id = cat.user.id
+        p2 = game.get_player(cat.event.at)
 
-        await play_card(card)
-        await turn_next()
+        await player.play_card(card)
+        await game.send(f"目标是 {p2.index_name}！")
+        await game.turn_next()
