@@ -1,12 +1,10 @@
 '''猫猫'''
 from ayaka import AyakaCat
-from .config import R
+from .config import R, config
 
 cat = AyakaCat(f"{R.犯人}在跳舞")
-cat.help = '''
-3-8人游玩，游玩前请先加bot好友，否则无法发牌
-开局4张手牌，轮流出牌，具体帮助请查看 详细帮助、卡牌帮助、牌库规则
-若长时间不出牌则会被系统强制弃牌（防止挂机）
+cat.help = f'''
+3-8人游玩，游玩前请先加bot好友，否则无法发牌。{config.overtime}s内不出牌会被系统强制弃牌（防止挂机）
 '''
 
 help_dict = {
