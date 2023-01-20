@@ -37,7 +37,7 @@ async def rumor():
         # 设置接收方为上家
         game.round_give.set_receivers()
 
-        await cat.send("谣言抽取中...")
+        await cat.send(f"{R.谣言}抽取中...")
 
         await game.round_give.convey_all()
         await sleep(2)

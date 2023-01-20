@@ -1,6 +1,7 @@
 '''游戏局势'''
 from ..cat import cat
 from ..model import Game
+from ..config import R
 
 
 @cat.on_cmd(cmds="局势", states="game")
@@ -17,10 +18,10 @@ async def show_game_info():
         items.append(f"{p.index_name} {len(p.cards)}张")
 
     if game.detect_num:
-        items.append(f"剩余侦探牌 {game.detect_num}张")
+        items.append(f"剩余{R.侦探}牌 {game.detect_num}张")
 
     if game.cert_num:
-        items.append(f"剩余不在场证明牌 {game.cert_num}张")
+        items.append(f"剩余{R.不在场证明}牌 {game.cert_num}张")
 
     items.append(f"目前轮到 {game.current_player.index_name}")
 

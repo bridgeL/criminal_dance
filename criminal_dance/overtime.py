@@ -2,7 +2,7 @@
 import asyncio
 from random import choice
 from typing import TYPE_CHECKING
-from .config import config
+from .config import config, R
 
 if TYPE_CHECKING:
     from .model import Player
@@ -24,7 +24,7 @@ async def overtime(player: "Player"):
             card = choice(player.cards)
             player.cards.remove(card)
             await game.send(f"{player.index_name} 被系统强制丢弃了{card}")
-            if card == "犯人":
+            if card == R.犯人:
                 player.is_good = False
                 await game.end(True)
             else:

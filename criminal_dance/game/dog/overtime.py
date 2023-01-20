@@ -2,7 +2,7 @@
 import asyncio
 from random import choice
 from ...model import Player
-from ...config import config
+from ...config import config, R
 
 
 def set_overtime_task(player: Player):
@@ -22,14 +22,14 @@ async def overtime(player: Player):
             player.cards.remove(card)
             await game.send(f"{player.index_name} 被系统强制丢弃了{card}")
 
-            if card == "犯人":
+            if card == R.犯人:
                 player.is_good = False
                 owner = game.get_player(game.dog.owner_id)
                 owner.is_good = True
                 return await game.end(True)
 
-            player.cards.append("神犬")
-            await game.send(f"{player.index_name} 获得神犬牌")
+            player.cards.append(R.神犬)
+            await game.send(f"{player.index_name} 获得{R.神犬}牌")
 
             game.set_state("game")
             await game.turn_next()

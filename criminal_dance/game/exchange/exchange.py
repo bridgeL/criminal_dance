@@ -25,22 +25,19 @@ async def exchange():
             return
 
         if cat.event.at == player.id:
-            return await game.send("不能和自己交易")
-            
-        await player.play_card(card)
+            return await game.send(f"不能和自己{R.交易}")
 
         p2 = game.get_player(cat.event.at)
+
+        if not p2.cards:
+            return await cat.send(f"{p2.index_name} 没有可{R.交易}的手牌")
+
+        await player.play_card(card)
         await game.send(f"目标是 {p2.index_name}！")
 
         if not player.cards:
-            await cat.send(f"但是{player.index_name} 没有可{R.交易}的手牌，此牌无效果")
+            await cat.send(f"{player.index_name} 没有可{R.交易}的手牌，此牌仍打出，但无效果")
             return await game.turn_next()
-
-        if not p2.cards:
-            await cat.send(f"但是{p2.index_name} 没有可{R.交易}的手牌，此牌无效果")
-            return await game.turn_next()
-
-        p2 = game.get_player(cat.event.at)
 
         # 记录两人
         game.round_give.init([player, p2])

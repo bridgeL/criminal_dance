@@ -33,5 +33,5 @@ async def detect():
             player.is_good = True
             return await game.end(True)
 
-        await game.send(f"{p2.index_name} 不是犯人~")
+        await game.send(f"{p2.index_name} 不是{R.犯人}~")
         await game.turn_next()

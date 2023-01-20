@@ -24,11 +24,11 @@ async def dog():
             return
 
         if cat.event.at == player.id:
-            return await game.send("狗不咬主人")
+            return await game.send(f"{R.神犬}不咬主人")
 
         p2 = game.get_player(cat.event.at)
         if not p2.cards:
-            return await game.send("神犬牌只能扑向有手牌的玩家")
+            return await game.send(f"{R.神犬}只能扑向有手牌的玩家")
 
         game.dog.target_id = p2.id
         game.dog.owner_id = cat.user.id
@@ -66,14 +66,14 @@ async def dog_bite():
 
         await player.play_card(card)
 
-        if card == "犯人":
+        if card == R.犯人:
             player.is_good = False
             owner = game.get_player(game.dog.owner_id)
             owner.is_good = True
             return await game.end(True)
 
-        player.cards.append("神犬")
-        await game.send(f"{player.index_name} 获得神犬牌")
+        player.cards.append(R.神犬)
+        await game.send(f"{player.index_name} 获得{R.神犬}牌")
 
         game.set_state("game")
         await game.turn_next()
