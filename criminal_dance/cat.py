@@ -25,7 +25,7 @@ help_dict = {
 }
 
 
-all_cards = f'''
+all_cards_str = f'''
 所有手牌种类：{R.共犯}， {R.普通人}，{R.不在场证明}， {R.目击者}， {R.侦探}， {R.交易}， {R.谣言}， {R.情报交换}， {R.警部}， {R.犯人}，{R.神犬}，{R.第一发现人}
 '''.strip()
 
@@ -33,55 +33,45 @@ all_cards = f'''
 @cat.on_cmd(cmds="卡牌帮助", states="*")
 async def _():
     '''<卡牌名> 获取相应的帮助'''
-    await cat.send(all_cards)
     help = help_dict.get(cat.arg)
     if not help:
-        return await cat.send("\n".join(f"[{k}] {v}" for k, v in help_dict.items()))
+        await cat.send(all_cards_str)
+        return await cat.send_many([f"[{k}] {v}" for k, v in help_dict.items()])
     await cat.send(help)
 
-total_help = f'''
-开局4张手牌，轮流出牌
-
+total_helps = f'''
+开局每人4张手牌，轮流出牌
 拥有{R.第一发现人}的人优先出牌（类似扑克规则的红桃3），且第一张牌必须是{R.第一发现人}
 
 {R.犯人}牌只有在手牌数为1的时候才能打出，此时打出者作为{R.犯人}而胜利
-
 其他人的目标就是在{R.犯人}逃跑成功之前，通过{R.侦探}、{R.神犬}、{R.警部}等牌抓到{R.犯人}，此时好人阵营胜利
 
 当你打出{R.共犯}牌后，你便加入了坏人阵营，需要协助{R.犯人}获胜
-
 当然，你也可以当个二五仔，若{R.共犯}使用{R.侦探}等牌抓到了{R.犯人}，那么他也视为好人阵营一同胜利
 
 根据参与人数的不同，牌库的牌也不同，具体规则请发送 牌库规则 进一步了解
 
 此外，当游戏进行中时
-
 可以在群聊发送 局势，获得游戏进行情况等信息
 或在私聊bot发送 手牌，获得你当前的手牌情况
-'''.strip()
+'''.strip().split("\n\n")
 
 
 @cat.on_cmd(cmds="详细帮助", states="*")
 async def _():
-    await cat.send(total_help)
+    await cat.send_many(total_helps)
 
 
-cards_build_help = f'''
+cards_build_helps = f'''
 3人局，必须有{R.第一发现人}、{R.犯人}、{R.侦探}、{R.不在场证明}，加其他任意8张牌
-
 4人局，必须有{R.第一发现人}、{R.犯人}、{R.侦探}、{R.不在场证明}、{R.共犯}，加其他任意11张牌
-
 5人局，必须有{R.第一发现人}、{R.犯人}、{R.侦探}、{R.不在场证明}*2、{R.共犯}，加其他任意14张牌
-
 6人局，必须有{R.第一发现人}、{R.犯人}、{R.侦探}*2、{R.不在场证明}*2、{R.共犯}*2，加其他任意16张牌
-
 7人局，必须有{R.第一发现人}、{R.犯人}、{R.侦探}*2、{R.不在场证明}*3、{R.共犯}*2，加其他任意19张牌
-
 8人局，加全部
-'''.strip()
+'''.strip().split("\n")
 
 
 @cat.on_cmd(cmds="牌库规则", states="*")
 async def _():
-    await cat.send(all_cards)
-    await cat.send(cards_build_help)
+    await cat.send_many(cards_build_helps)
