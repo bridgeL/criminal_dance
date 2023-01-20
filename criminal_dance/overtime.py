@@ -1,3 +1,4 @@
+'''打牌超时'''
 import asyncio
 from random import choice
 from typing import TYPE_CHECKING
@@ -16,10 +17,8 @@ def set_overtime_task(player: "Player"):
 
 async def overtime(player: "Player"):
     try:
-        print("开启计时器")
         await asyncio.wait_for(player.fut, config.overtime)
     except asyncio.exceptions.TimeoutError:
-        print("超时了")
         game = player.game
         async with game.lock:
             card = choice(player.cards)
@@ -30,5 +29,3 @@ async def overtime(player: "Player"):
                 await game.end(True)
             else:
                 await game.turn_next()
-    else:
-        print("关闭计时器")

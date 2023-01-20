@@ -49,11 +49,4 @@ pro_n = [
 
 
 def get_cards(n: int):
-    # ---- 临时调试
-    return [
-        "第一发现人", "交易", "情报交换", "侦探",
-        "共犯", "交易", "情报交换", "情报交换",
-        "情报交换", "情报交换", "情报交换", "犯人",
-    ]
-    
     return unique[n] + sample(normal, normal_n[n]) + sample(pro, pro_n[n])

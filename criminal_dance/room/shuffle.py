@@ -10,9 +10,6 @@ def _shuffle(cards: list[str]):
 
 
 def shuffle(cards: list[str]):
-    # ---- 临时调试
-    return cards
-    
     for i in range(3):
         _shuffle(cards)
     return cards

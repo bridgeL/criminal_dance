@@ -1,3 +1,4 @@
+'''情报交换超时'''
 import asyncio
 from random import choice
 from ...model import Player
@@ -13,10 +14,8 @@ def set_overtime_task(player: Player):
 
 async def overtime(player: Player):
     try:
-        print("开启计时器")
         await asyncio.wait_for(player.fut, config.overtime)
     except asyncio.exceptions.TimeoutError:
-        print("超时了")
         game = player.game
         give = game.round_give.get_give(player.id)
         async with game.lock:
@@ -31,9 +30,6 @@ async def overtime(player: Player):
                 game.round_give.set_receivers()
                 await game.round_give.convey_all()
                 await asyncio.sleep(2)
-                
+
                 game.set_state("game")
                 await game.turn_next()
-
-    else:
-        print("关闭计时器")

@@ -123,7 +123,6 @@ class GiveAction(BaseModel):
 
     def convey(self):
         if self.ready:
-            print(self.giver.name, self.receiver.name, self.card, self.giver.cards, self.receiver.cards)
             self.giver.cards.remove(self.card)
             self.receiver.cards.append(self.card)
 
@@ -277,8 +276,6 @@ class Game(BaseModel):
             "，".join(losers) + "输了",
         ]
         await self.send("\n".join(items))
-
-        # ---- 待修改 这里有问题，因为game.end可能会在私聊中调用
         await self.send("已返回房间")
         self.set_state("room")
 
