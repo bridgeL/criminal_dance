@@ -229,8 +229,7 @@ class Game(BaseModel):
         return self.players[self.index]
 
     def set_state(self, state: str):
-        '''在群聊、私聊均可用'''
-        cat.set_state(state, AyakaChannel(type="group", id=self.group_id))
+        cat.state = state
 
     async def turn_next(self):
         '''转移至下一个有牌的玩家'''
