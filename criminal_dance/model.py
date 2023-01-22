@@ -4,7 +4,6 @@ import asyncio
 from random import choice
 from typing import Awaitable, Callable, Optional
 from pydantic import BaseModel
-from ayaka import AyakaChannel
 from .cat import cat, help_dict
 from .config import R, config
 
@@ -73,7 +72,7 @@ class Player(BaseModel):
 
     async def send(self, msg: str):
         '''发送私聊消息'''
-        await cat.base_send(AyakaChannel(type="private", id=self.id), msg)
+        await cat.base_send_private(self.id, msg)
 
     async def check(self, card: str, max_num: int = 4, at_require: bool = False):
         '''检查牌是否可以打出'''
@@ -85,6 +84,8 @@ class Player(BaseModel):
             return False
         if card not in self.cards:
             await self.game.send(f"{self.index_name} 没有{card}")
+            items = ["你没有这张牌，你当前的手牌是\n", *self.cards]
+            await self.send("\n".join(items))
             return False
         if len(self.cards) > max_num:
             await self.game.send(f"{card}只能在手牌<={max_num}时打出")
@@ -222,7 +223,7 @@ class Game(BaseModel):
 
     async def send(self, msg: str):
         '''发送群聊消息'''
-        await cat.base_send(AyakaChannel(type="group", id=self.group_id), msg)
+        await cat.base_send_group(self.group_id, msg)
 
     @property
     def current_player(self):
@@ -308,7 +309,7 @@ def on_cmd(
         async def _func():
             # 排除私聊发送的消息
             if cat.event.origin_channel:
-                return
+                return await cat.send("请在群聊里打牌")
 
             game = cat.get_data(Game)
 
@@ -366,7 +367,7 @@ def set_rg_cmd(
     async def _func():
         # 只接受私聊发送的消息
         if not cat.event.origin_channel:
-            return
+            return await cat.send("请在私聊里做决定")
 
         game = cat.get_data(Game)
 
@@ -428,3 +429,14 @@ async def overtime(player: Player):
         await game.end(True)
     else:
         await game.turn_next()
+
+
+@cat.on_cmd(cmds="退出游戏", states="*")
+async def _():
+    await cat.rest()
+    cat.remove_private_redirect()
+    game = cat.get_data(Game)
+    for p in game.players:
+        # 结束超时任务
+        if p.fut and not p.fut.done():
+            p.fut.set_result(True)

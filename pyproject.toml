@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "criminal_dance"
-version = "0.0.3"
+version = "0.0.4b0"
 description = "犯人在跳舞"
 authors = ["Su <wxlxy316@163.com>"]
 license = "MIT"
@@ -12,7 +12,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-ayaka = "^0.0.1.4"
+ayaka = "^0.0.1.5b0"
 
 [build-system]
 requires = ["poetry-core"]

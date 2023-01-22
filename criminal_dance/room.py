@@ -1,5 +1,4 @@
 '''房间'''
-from ayaka import AyakaChannel
 from .utils import shuffle, get_cards
 from .cat import cat
 from .config import R
@@ -19,19 +18,19 @@ async def wakeup():
 @cat.on_cmd(cmds="加入", states="room")
 async def join_room():
     '''加入房间'''
+    # 排除私聊转发
+    if cat.event.origin_channel:
+        return
+    
     name = cat.user.name
     room = cat.get_data(Room)
-    channel = AyakaChannel(
-        type="private",
-        id=cat.user.id
-    )
 
     try:
-        await cat.base_send(channel, "测试私聊，无需回复")
+        await cat.base_send_private(cat.user.id, "测试私聊，无需回复")
     except:
         await cat.send(f"{name} 不是bot好友，无法加入游戏")
     else:
-        cat.add_listener(channel)
+        cat.add_private_redirect(cat.user.id)
 
         room.join(cat.user.id, name)
         room.cards = []
@@ -43,17 +42,17 @@ async def join_room():
 @cat.on_cmd(cmds="离开", states="room")
 async def leave_room():
     '''离开房间'''
+    # 排除私聊转发
+    if cat.event.origin_channel:
+        return
+    
     name = cat.user.name
     room = cat.get_data(Room)
-    channel = AyakaChannel(
-        type="private",
-        id=cat.user.id
-    )
 
     room.leave(cat.user.id)
     room.cards = []
 
-    cat.remove_listener(channel)
+    cat.remove_private_redirect(cat.user.id)
 
     await cat.send(f"{name} 离开房间")
     await cat.send(room.info)
