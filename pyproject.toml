@@ -12,7 +12,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-ayaka = "^0.0.1.5b0"
+ayaka = "^0.0.1.5b1"
 
 [build-system]
 requires = ["poetry-core"]
