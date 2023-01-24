@@ -253,7 +253,7 @@ class Game(BaseModel):
         for p in self.players:
             # 结束超时任务
             if p.fut and not p.fut.done():
-                p.fut.set_result(True)
+                p.fut.cancel()
 
         goods = []
         bads = []
