@@ -250,6 +250,11 @@ class Game(BaseModel):
 
     async def end(self, good_win: bool):
         '''游戏终结，给出输赢'''
+        for p in self.players:
+            # 结束超时任务
+            if p.fut and not p.fut.done():
+                p.fut.set_result(True)
+
         goods = []
         bads = []
         for p in self.players:
