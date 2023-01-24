@@ -72,7 +72,7 @@ class Player(BaseModel):
 
     async def send(self, msg: str):
         '''发送私聊消息'''
-        await cat.base_send_private(self.id, msg)
+        await cat.send_private(self.id, msg)
 
     async def check(self, card: str, max_num: int = 4, at_require: bool = False):
         '''检查牌是否可以打出'''
@@ -223,7 +223,7 @@ class Game(BaseModel):
 
     async def send(self, msg: str):
         '''发送群聊消息'''
-        await cat.base_send_group(self.group_id, msg)
+        await cat.send_group(self.group_id, msg)
 
     @property
     def current_player(self):
@@ -308,7 +308,7 @@ def on_cmd(
 
         async def _func():
             # 排除私聊发送的消息
-            if cat.event.origin_channel:
+            if cat.event.private_forward_id:
                 return await cat.send("请在群聊里打牌")
 
             game = cat.get_data(Game)
@@ -366,7 +366,7 @@ def set_rg_cmd(
     '''
     async def _func():
         # 只接受私聊发送的消息
-        if not cat.event.origin_channel:
+        if not cat.event.private_forward_id:
             return await cat.send("请在私聊里做决定")
 
         game = cat.get_data(Game)

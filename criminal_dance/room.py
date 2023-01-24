@@ -8,7 +8,7 @@ from .model import Room, Game, Player, on_overtime
 @cat.on_cmd(cmds=f"{R.犯人}在跳舞")
 async def wakeup():
     '''唤醒猫猫'''
-    await cat.start("room")
+    await cat.wakeup("room")
     await cat.send_help()
     room = cat.get_data(Room)
     room.users = []
@@ -19,14 +19,14 @@ async def wakeup():
 async def join_room():
     '''加入房间'''
     # 排除私聊转发
-    if cat.event.origin_channel:
+    if cat.event.private_forward_id:
         return
     
     name = cat.user.name
     room = cat.get_data(Room)
 
     try:
-        await cat.base_send_private(cat.user.id, "测试私聊，无需回复")
+        await cat.send_private(cat.user.id, "测试私聊，无需回复")
     except:
         await cat.send(f"{name} 不是bot好友，无法加入游戏")
     else:
@@ -43,7 +43,7 @@ async def join_room():
 async def leave_room():
     '''离开房间'''
     # 排除私聊转发
-    if cat.event.origin_channel:
+    if cat.event.private_forward_id:
         return
     
     name = cat.user.name
@@ -66,7 +66,7 @@ async def leave_room():
 async def show_room():
     '''查看房间信息'''
     # 排除私聊发送的消息
-    if cat.event.origin_channel:
+    if cat.event.private_forward_id:
         return
 
     room = cat.get_data(Room)
@@ -77,7 +77,7 @@ async def show_room():
 async def start_game():
     '''开始游戏'''
     # 排除私聊发送的消息
-    if cat.event.origin_channel:
+    if cat.event.private_forward_id:
         return
 
     room = cat.get_data(Room)
@@ -99,7 +99,7 @@ async def start_game():
 
     # 初始化游戏
     game = cat.get_data(Game)
-    game.init(room, cat.channel.id)
+    game.init(room, cat.session.id)
 
     # 通知
     items = ["游戏开始\n"]

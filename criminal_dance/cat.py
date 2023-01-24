@@ -31,7 +31,9 @@ all_cards_str = f'''
 @cat.on_cmd(cmds="卡牌帮助", states="*")
 async def _():
     '''<卡牌名> 获取相应的帮助'''
-    help = help_dict.get(cat.arg)
+    help = None
+    if cat.arg:
+        help = help_dict.get(cat.arg)
     if not help:
         await cat.send(all_cards_str)
         return await cat.send_many([f"[{k}] {v}" for k, v in help_dict.items()])
