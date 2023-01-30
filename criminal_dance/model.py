@@ -4,7 +4,7 @@ import asyncio
 from random import choice
 from typing import Awaitable, Callable, Optional
 from pydantic import BaseModel
-from .cat import cat, help_dict
+from .cat import cat, get_uid, help_dict
 from .config import R, config
 
 
@@ -317,9 +317,11 @@ def on_cmd(
                 return await cat.send("请在群聊里打牌")
 
             game = cat.get_data(Game)
+            
+            uid = get_uid()
 
             # 排除未参加游戏的人
-            player = game.get_player(cat.user.id)
+            player = game.get_player(uid)
             if not player:
                 return
 
@@ -375,7 +377,7 @@ def set_rg_cmd(
             return await cat.send("请在私聊里做决定")
 
         game = cat.get_data(Game)
-
+        
         # 排除不参与情报交换的
         give = game.round_give.get_give(cat.user.id)
         if not give:

@@ -1,5 +1,5 @@
 '''猫猫'''
-from ayaka import AyakaCat
+from ayaka import AyakaCat, get_adapter
 from .config import R, config
 
 cat = AyakaCat(f"{R.犯人}在跳舞")
@@ -75,3 +75,28 @@ cards_build_helps = f'''
 @cat.on_cmd(cmds="牌库规则", states="*")
 async def _():
     await cat.send_many(cards_build_helps)
+
+uid_redirect_dict: dict[str, str] = {}
+'''重定向'''
+
+
+def get_uid():
+    '''获取当前发言者的uid'''
+    uid = cat.user.id
+
+    if cat.private:
+        return uid
+
+    adapter = get_adapter()
+    if adapter.name != "nb2.ob11.qqguild_patch":
+        return uid
+
+    return uid_redirect_dict[uid]
+
+
+@cat.on_cmd(cmds="绑定私聊", states="*")
+async def _():
+    '''<qq uid> 频道用户请使用该命令'''
+    uid = cat.user.id
+    uid_redirect_dict[uid] = cat.arg
+    await cat.send(f"{cat.user.name} - {uid} - {cat.arg} 绑定成功")

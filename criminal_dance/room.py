@@ -1,6 +1,7 @@
 '''房间'''
+from ayaka import get_adapter
 from .utils import shuffle, get_cards
-from .cat import cat
+from .cat import cat, get_uid
 from .config import R
 from .model import Room, Game, Player, on_overtime
 
@@ -21,18 +22,22 @@ async def join_room():
     # 排除私聊转发
     if cat.event.private_forward_id:
         return
-    
+
     name = cat.user.name
     room = cat.get_data(Room)
 
     try:
-        await cat.send_private(cat.user.id, "测试私聊，无需回复")
+        uid = get_uid()
+        await cat.send_private(uid, "测试私聊，无需回复")
     except:
         await cat.send(f"{name} 不是bot好友，无法加入游戏")
-    else:
-        cat.add_private_redirect(cat.user.id)
 
-        room.join(cat.user.id, name)
+        if get_adapter().name == "nb2.ob11.qqguild_patch":
+            await cat.send("频道用户请使用命令：绑定私聊 <qq号>\nbot将通过qq私聊给您发牌")
+    else:
+        cat.add_private_redirect(uid)
+
+        room.join(uid, name)
         room.cards = []
 
         await cat.send(f"{name} 加入房间")
@@ -45,14 +50,16 @@ async def leave_room():
     # 排除私聊转发
     if cat.event.private_forward_id:
         return
-    
+
     name = cat.user.name
     room = cat.get_data(Room)
 
-    room.leave(cat.user.id)
+    uid = get_uid()
+
+    room.leave(uid)
     room.cards = []
 
-    cat.remove_private_redirect(cat.user.id)
+    cat.remove_private_redirect(uid)
 
     await cat.send(f"{name} 离开房间")
     await cat.send(room.info)

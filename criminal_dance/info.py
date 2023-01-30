@@ -1,5 +1,5 @@
 '''游戏局势'''
-from .cat import cat
+from .cat import cat, get_uid
 from .model import Game
 from .config import R
 
@@ -42,8 +42,10 @@ async def show_cards():
     game = cat.get_data(Game)
     if not game.start:
         return
-
-    player = game.get_player(cat.user.id)
+    
+    uid = get_uid()
+    
+    player = game.get_player(uid)
     if not player:
         return
 

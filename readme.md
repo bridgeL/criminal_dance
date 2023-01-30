@@ -1,6 +1,6 @@
 <div align="center">
 
-# 犯人在跳舞 0.1.0
+# 犯人在跳舞 0.1.1
 
 祝各位新年快乐~
 
@@ -15,7 +15,7 @@
 
 得益于[ayaka](https://github.com/bridgeL/ayaka)，本插件可作为如下机器人框架的插件使用
 
-- [nonebot2](https://github.com/nonebot/nonebot2)(使用[onebot11](https://github.com/nonebot/adapter-onebot)适配器)
+- [nonebot2](https://github.com/nonebot/nonebot2)(使用[onebot11](https://github.com/nonebot/adapter-onebot)适配器，可兼容qq频道)
 - [hoshino](https://github.com/Ice-Cirno/HoshinoBot)
 - [nonebot1](https://github.com/nonebot/nonebot)
 
@@ -56,6 +56,7 @@ python run.py
 - 退出游戏
 - 局势 查看场面局势
 - 手牌 私聊展示手牌
+- 绑定私聊 频道用户请使用该命令
 [room]
 - 加入
 - 离开
@@ -151,7 +152,7 @@ python run.py
 
 ## 更新记录
 
-### 0.0.1b0
+### 0.0.1b2
 
 - 原型阶段，勉强可玩
 
@@ -180,3 +181,8 @@ python run.py
 - 修复BUG：结束游戏后超时机制没有正确关闭
 - 修复BUG：神犬、侦探牌打出后没有按预期切换牌权
 - 更新依赖 ayaka 0.0.2.0
+
+### 0.1.1
+
+- 更新依赖 ayaka 0.0.3.0
+- 新特性：支持qq频道
