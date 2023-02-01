@@ -317,7 +317,7 @@ def on_cmd(
                 return await cat.send("请在群聊里打牌")
 
             game = cat.get_data(Game)
-            
+
             uid = get_uid()
 
             # 排除未参加游戏的人
@@ -360,53 +360,7 @@ def on_cmd(
     return decorator
 
 
-def set_rg_cmd(
-    cmds: str | list[str],
-    states: str | list[str],
-    name: str
-):
-    '''
-    - 只接受私聊发送的消息
-    - 排除give.giver玩家
-    - 排除打牌失败
-    - 交换牌
-    '''
-    async def _func():
-        # 只接受私聊发送的消息
-        if not cat.event.private_forward_id:
-            return await cat.send("请在私聊里做决定")
-
-        game = cat.get_data(Game)
-        
-        # 排除不参与情报交换的
-        give = game.round_give.get_give(cat.user.id)
-        if not give:
-            return
-
-        async with game.lock:
-            card = cat.cmd
-            if card not in give.giver.cards:
-                items = ["你没有这张牌，你当前的手牌是\n", *give.giver.cards]
-                return await give.giver.send("\n".join(items))
-
-            give.card = card
-            give.giver.fut.set_result(True)
-            await game.send(f"{give.giver.index_name} 已决定好卡牌")
-
-            # 判断是否完成
-            if game.round_give.all_given:
-                # 私聊 互相给牌
-                game.round_give.set_receivers()
-                await game.round_give.convey_all()
-                await asyncio.sleep(2)
-
-                game.set_state("game")
-                await game.turn_next()
-    _func.__name__ = name
-    cat.on_cmd(cmds=cmds, states=states, auto_help=False)(_func)
-
-
-def on_overtime(func: Callable[[Player], Awaitable]):
+def overtime_wrapper(func: Callable[[Player], Awaitable]):
     '''超时任务装饰器'''
 
     async def overtime(player: Player):
@@ -424,7 +378,7 @@ def on_overtime(func: Callable[[Player], Awaitable]):
     return set_start
 
 
-@on_overtime
+@overtime_wrapper
 async def overtime(player: Player):
     '''打牌超时'''
     game = player.game

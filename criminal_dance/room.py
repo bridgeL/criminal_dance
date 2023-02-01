@@ -3,7 +3,7 @@ from ayaka import get_adapter
 from .utils import shuffle, get_cards
 from .cat import cat, get_uid
 from .config import R
-from .model import Room, Game, Player, on_overtime
+from .model import Room, Game, Player, overtime_wrapper
 
 
 @cat.on_cmd(cmds=f"{R.犯人}在跳舞")
@@ -125,7 +125,7 @@ async def start_game():
     overtime(game.current_player)
 
 
-@on_overtime
+@overtime_wrapper
 async def overtime(player: Player):
     card = R.第一发现人
     player.cards.remove(card)

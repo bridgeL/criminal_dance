@@ -1,6 +1,6 @@
 '''神犬'''
 from random import choice
-from ..model import on_cmd, on_overtime, Game, Player, AtPlayer
+from ..model import on_cmd, overtime_wrapper, Game, Player, AtPlayer
 from ..config import R
 
 
@@ -47,7 +47,7 @@ async def dog_bite(game: Game, player: Player, card: str):
     await game.turn_next()
 
 
-@on_overtime
+@overtime_wrapper
 async def overtime(player: Player):
     game = player.game
     card = choice(player.cards)
