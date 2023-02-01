@@ -21,11 +21,18 @@
 
 也可将其作为console程序离线运行
 
-## 安装
+## nonebot2 安装本插件
 
 ```
 pip install criminal_dance
 ```
+
+## hoshino 安装本插件
+
+- 从github仓库下载
+- 安装依赖`pip install -r requirements.txt`
+- 将`criminal_dance/criminal_dance`文件夹放入`hoshino/modules`
+- 在`hoshino/config/__bot__.py`中的`MODULES_ON`里，写入字符串`criminal_dance`
 
 ## 作为console程序离线运行
 
