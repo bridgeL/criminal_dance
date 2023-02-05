@@ -392,7 +392,7 @@ async def overtime(player: Player):
         await game.turn_next()
 
 
-@cat.on_cmd(cmds="退出游戏", states="*")
+@cat.on_cmd(cmds=["退出游戏", "退出"], states="*")
 async def _():
     await cat.rest()
     cat.remove_private_redirect()
