@@ -10,6 +10,7 @@ async def detect(game: Game, player: Player, p2: AtPlayer):
     # 侦探排查中...
     if R.犯人 in p2.cards and R.不在场证明 not in p2.cards:
         player.is_good = True
+        p2.is_good = False
         return await game.end(True)
 
     await game.send(f"{p2.index_name} 不是{R.犯人}~")
